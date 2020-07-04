@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("XTBPlugin.SolutionTransformer")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Solution Transformer")]
+[assembly: AssemblyDescription("Tis is a XrmToolBox Plugin to generate a solution from all unmanaged components")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("CRMPartners")]
+[assembly: AssemblyCompany("Lars Müller, CRM Partners AG")]
 [assembly: AssemblyProduct("XTBPlugin.SolutionTransformer")]
 [assembly: AssemblyCopyright("Copyright © CRMPartners 2020")]
 [assembly: AssemblyTrademark("")]
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.2020.7.4")]
+[assembly: AssemblyFileVersion("1.2020.7.4")]

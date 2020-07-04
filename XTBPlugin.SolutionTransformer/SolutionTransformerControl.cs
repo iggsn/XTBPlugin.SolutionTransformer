@@ -11,6 +11,7 @@ using XrmToolBox.Extensibility;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk;
 using McTools.Xrm.Connection;
+using Microsoft.Xrm.Sdk.Deployment;
 
 namespace XTBPlugin.SolutionTransformer
 {
@@ -18,14 +19,16 @@ namespace XTBPlugin.SolutionTransformer
     {
         private Settings mySettings;
 
+        public Dictionary<string, Entity> SolutionEntities { get; set; } = new Dictionary<string, Entity>();
+
         public SolutionTransformerControl()
         {
             InitializeComponent();
         }
 
-        private void MyPluginControl_Load(object sender, EventArgs e)
+        private void SolutionTransformerControl_Load(object sender, EventArgs e)
         {
-            ShowInfoNotification("This is a notification that can lead to XrmToolBox repository", new Uri("https://github.com/MscrmTools/XrmToolBox"));
+            //ShowInfoNotification("This is a notification that can lead to XrmToolBox repository", new Uri("https://github.com/MscrmTools/XrmToolBox"));
 
             // Loads or creates the settings for the plugin
             if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
@@ -38,6 +41,8 @@ namespace XTBPlugin.SolutionTransformer
             {
                 LogInfo("Settings found and loaded");
             }
+
+            ExecuteMethod(LoadSolutions);
         }
 
         private void tsbClose_Click(object sender, EventArgs e)
@@ -50,6 +55,46 @@ namespace XTBPlugin.SolutionTransformer
             // The ExecuteMethod method handles connecting to an
             // organization if XrmToolBox is not yet connected
             ExecuteMethod(GetAccounts);
+        }
+
+        private void LoadSolutions()
+        {
+            cB_Solutions.Items.Clear();
+
+            QueryExpression solutionsQuery = new QueryExpression("solution");
+            solutionsQuery.ColumnSet = new ColumnSet(true);
+            solutionsQuery.Criteria.AddCondition("ismanaged", ConditionOperator.Equal, false);
+
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = "Getting all unmanaged solutions",
+
+                Work = (worker, args) =>
+                {
+                    args.Result = Service.RetrieveMultiple(solutionsQuery);
+                },
+                PostWorkCallBack = (args) =>
+                {
+                    if (args.Error != null)
+                    {
+                        LogError("An error happend while loading the solutions.", args.Error);
+                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    var result = args.Result as EntityCollection;
+                    if (result != null)
+                    {
+                        SolutionEntities = result.Entities.ToList().ToDictionary(x => x.GetAttributeValue<string>("uniquename"));
+                        foreach (Entity solution in result.Entities)
+                        {
+                            if (solution.GetAttributeValue<string>("uniquename") == "Active" || solution.GetAttributeValue<string>("uniquename") == "Default" || solution.GetAttributeValue<string>("uniquename") == "Basic")
+                                continue;
+
+                            cB_Solutions.Items.Add(solution.GetAttributeValue<string>("uniquename"));
+                        }
+                    }
+                },
+
+            });
         }
 
         private void GetAccounts()
