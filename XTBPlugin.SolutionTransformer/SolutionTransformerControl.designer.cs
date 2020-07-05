@@ -28,11 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SolutionTransformerControl));
             this.toolStripMenu = new System.Windows.Forms.ToolStrip();
             this.tsbClose = new System.Windows.Forms.ToolStripButton();
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbSample = new System.Windows.Forms.ToolStripButton();
+            this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.cB_Solutions = new System.Windows.Forms.ComboBox();
+            this.clbPublisher = new System.Windows.Forms.CheckedListBox();
             this.toolStripMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -42,7 +45,8 @@
             this.toolStripMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsbClose,
             this.tssSeparator1,
-            this.tsbSample});
+            this.tsbRefresh,
+            this.toolStripButton1});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Size = new System.Drawing.Size(559, 31);
@@ -63,26 +67,46 @@
             this.tssSeparator1.Name = "tssSeparator1";
             this.tssSeparator1.Size = new System.Drawing.Size(6, 31);
             // 
-            // tsbSample
+            // tsbRefresh
             // 
-            this.tsbSample.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsbSample.Name = "tsbSample";
-            this.tsbSample.Size = new System.Drawing.Size(46, 28);
-            this.tsbSample.Text = "Try me";
-            this.tsbSample.Click += new System.EventHandler(this.tsbSample_Click);
+            this.tsbRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbRefresh.Image = global::XTBPlugin.SolutionTransformer.Properties.Resources.icons8_aus_der_cloud_laden_24;
+            this.tsbRefresh.Name = "tsbRefresh";
+            this.tsbRefresh.Size = new System.Drawing.Size(28, 28);
+            this.tsbRefresh.Text = "Refresh";
+            this.tsbRefresh.Click += new System.EventHandler(this.tsbResfresh_Click);
+            // 
+            // toolStripButton1
+            // 
+            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
+            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton1.Name = "toolStripButton1";
+            this.toolStripButton1.Size = new System.Drawing.Size(95, 28);
+            this.toolStripButton1.Text = "Add To Solution";
+            this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
             // 
             // cB_Solutions
             // 
             this.cB_Solutions.FormattingEnabled = true;
             this.cB_Solutions.Location = new System.Drawing.Point(14, 45);
             this.cB_Solutions.Name = "cB_Solutions";
-            this.cB_Solutions.Size = new System.Drawing.Size(121, 21);
+            this.cB_Solutions.Size = new System.Drawing.Size(193, 21);
             this.cB_Solutions.TabIndex = 5;
+            // 
+            // clbPublisher
+            // 
+            this.clbPublisher.FormattingEnabled = true;
+            this.clbPublisher.Location = new System.Drawing.Point(14, 83);
+            this.clbPublisher.Name = "clbPublisher";
+            this.clbPublisher.Size = new System.Drawing.Size(193, 109);
+            this.clbPublisher.TabIndex = 6;
             // 
             // SolutionTransformerControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.clbPublisher);
             this.Controls.Add(this.cB_Solutions);
             this.Controls.Add(this.toolStripMenu);
             this.Name = "SolutionTransformerControl";
@@ -98,8 +122,10 @@
         #endregion
         private System.Windows.Forms.ToolStrip toolStripMenu;
         private System.Windows.Forms.ToolStripButton tsbClose;
-        private System.Windows.Forms.ToolStripButton tsbSample;
+        private System.Windows.Forms.ToolStripButton tsbRefresh;
         private System.Windows.Forms.ToolStripSeparator tssSeparator1;
         private System.Windows.Forms.ComboBox cB_Solutions;
+        private System.Windows.Forms.ToolStripButton toolStripButton1;
+        private System.Windows.Forms.CheckedListBox clbPublisher;
     }
 }

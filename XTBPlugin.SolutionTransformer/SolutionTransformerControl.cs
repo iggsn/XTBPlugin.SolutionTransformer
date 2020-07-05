@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using XrmToolBox.Extensibility;
-using Microsoft.Xrm.Sdk.Query;
+﻿using McTools.Xrm.Connection;
+
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
-using McTools.Xrm.Connection;
-using Microsoft.Xrm.Sdk.Deployment;
+using Microsoft.Xrm.Sdk.Query;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
+
+using XrmToolBox.Extensibility;
 
 namespace XTBPlugin.SolutionTransformer
 {
@@ -20,6 +18,8 @@ namespace XTBPlugin.SolutionTransformer
         private Settings mySettings;
 
         public Dictionary<string, Entity> SolutionEntities { get; set; } = new Dictionary<string, Entity>();
+        public Dictionary<Guid, Entity> PublisherEntities { get; set; } = new Dictionary<Guid, Entity>();
+        public Dictionary<Guid, Entity> WebResources { get; set; } = new Dictionary<Guid, Entity>();
 
         public SolutionTransformerControl()
         {
@@ -43,6 +43,7 @@ namespace XTBPlugin.SolutionTransformer
             }
 
             ExecuteMethod(LoadSolutions);
+            ExecuteMethod(LoadPublisher);
         }
 
         private void tsbClose_Click(object sender, EventArgs e)
@@ -50,11 +51,11 @@ namespace XTBPlugin.SolutionTransformer
             CloseTool();
         }
 
-        private void tsbSample_Click(object sender, EventArgs e)
+        private void tsbResfresh_Click(object sender, EventArgs e)
         {
             // The ExecuteMethod method handles connecting to an
             // organization if XrmToolBox is not yet connected
-            ExecuteMethod(GetAccounts);
+            ExecuteMethod(GetWebResources);
         }
 
         private void LoadSolutions()
@@ -89,11 +90,139 @@ namespace XTBPlugin.SolutionTransformer
                             if (solution.GetAttributeValue<string>("uniquename") == "Active" || solution.GetAttributeValue<string>("uniquename") == "Default" || solution.GetAttributeValue<string>("uniquename") == "Basic")
                                 continue;
 
-                            cB_Solutions.Items.Add(solution.GetAttributeValue<string>("uniquename"));
+                            cB_Solutions.Items.Add(solution.GetAttributeValue<string>("uniquename"), CheckState.Checked);
                         }
                     }
                 },
 
+            });
+        }
+
+        private void LoadPublisher()
+        {
+            cB_Solutions.Items.Clear();
+
+            QueryExpression publisherQuery = new QueryExpression("publisher")
+            {
+                ColumnSet = new ColumnSet(true),
+                Criteria =
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression("isreadonly", ConditionOperator.Equal, false),
+                        new ConditionExpression("customizationprefix", ConditionOperator.NotNull)
+                    }
+                }
+            };
+
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = "Getting all publisher",
+
+                Work = (worker, args) =>
+                {
+                    args.Result = Service.RetrieveMultiple(publisherQuery);
+                },
+                PostWorkCallBack = (args) =>
+                {
+                    if (args.Error != null)
+                    {
+                        LogError("An error happend while loading the publishers.", args.Error);
+                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    var result = args.Result as EntityCollection;
+                    if (result != null)
+                    {
+                        PublisherEntities = result.Entities.ToList().ToDictionary(x => x.Id);
+                        foreach (Entity publisher in result.Entities)
+                        {
+                            if (string.IsNullOrEmpty(publisher.GetAttributeValue<string>("customizationprefix")) || clbPublisher.Items.Contains(publisher.GetAttributeValue<string>("customizationprefix")))
+                                continue;
+
+                            clbPublisher.Items.Add(publisher.GetAttributeValue<string>("customizationprefix"));
+                        }
+                    }
+                },
+
+            });
+        }
+
+        private void GetWebResources()
+        {
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = "Getting WebResources",
+                Work = (worker, args) =>
+                {
+                    QueryExpression webResources = new QueryExpression("webresource")
+                    {
+                        TopCount = 50,
+                        ColumnSet = new ColumnSet("componentstate", "ishidden", "iscustomizable", "ismanaged", "webresourcetype", "name"),
+                        Criteria =
+                        {
+                            Conditions = {
+                                new ConditionExpression("ishidden", ConditionOperator.Equal, false),
+                                new ConditionExpression("ismanaged", ConditionOperator.Equal, false),
+                                new ConditionExpression("name", ConditionOperator.DoesNotBeginWith,  "cc_shared/")
+                            }
+                        }
+                    };
+
+                    args.Result = Service.RetrieveMultiple(webResources);
+                },
+                PostWorkCallBack = (args) =>
+                {
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    var result = args.Result as EntityCollection;
+                    if (result != null)
+                    {
+                        WebResources = result.Entities.ToList().ToDictionary(x => x.Id);
+                        MessageBox.Show($"Found {result.Entities.Count} resources");
+                    }
+                }
+            });
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            WorkAsync(new WorkAsyncInfo
+            {
+                Message = "Add To Solution",
+                Work = (worker, args) =>
+                {
+                    foreach (var webResource in WebResources)
+                    {
+                        AddSolutionComponentRequest addSolutionComponent = new AddSolutionComponentRequest
+                        {
+                            AddRequiredComponents = false,
+                            ComponentId = webResource.Key,
+                            ComponentType = 61,
+                            SolutionUniqueName = "XrmToolBoxTest"
+                        };
+
+                        Service.Execute(addSolutionComponent);
+                    }
+
+                    //1d866466-a8be-ea11-a812-000d3a378a3a
+
+                    args.Result = true;
+                },
+                PostWorkCallBack = (args) =>
+                {
+                    if (args.Error != null)
+                    {
+                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    //var result = args.Result as bool;
+                    //if (result != null)
+                    //{
+                    //    WebResources = result.Entities.ToList().ToDictionary(x => x.Id);
+                    MessageBox.Show($"Updated Solution");
+                    //}
+                }
             });
         }
 

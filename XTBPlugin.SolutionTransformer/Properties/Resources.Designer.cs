@@ -63,6 +63,16 @@ namespace XTBPlugin.SolutionTransformer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_aus_der_cloud_laden_24 {
+            get {
+                object obj = ResourceManager.GetObject("icons8_aus_der_cloud_laden_24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_fenster_schließen_24 {
             get {
                 object obj = ResourceManager.GetObject("icons8_fenster_schließen_24", resourceCulture);
