@@ -30,6 +30,8 @@ namespace XTBPlugin.SolutionTransformer
         public Dictionary<Guid, Entity> PublisherEntities { get; set; } = new Dictionary<Guid, Entity>();
         public Dictionary<Guid, Entity> WebResources { get; set; } = new Dictionary<Guid, Entity>();
 
+        public SolutionBuilder solutionBuilder;
+
         public SolutionTransformerControl()
         {
             InitializeComponent();
@@ -66,7 +68,7 @@ namespace XTBPlugin.SolutionTransformer
         {
             // The ExecuteMethod method handles connecting to an
             // organization if XrmToolBox is not yet connected
-            ExecuteMethod(GetWebResources);
+            ExecuteMethod(GetSolutionComponents);
         }
 
         /// <summary>
@@ -118,7 +120,7 @@ namespace XTBPlugin.SolutionTransformer
                             if (solution.GetAttributeValue<string>("uniquename") == "Active" || solution.GetAttributeValue<string>("uniquename") == "Default" || solution.GetAttributeValue<string>("uniquename") == "Basic")
                                 continue;
 
-                             cB_Solutions.Items.Add(solution.GetAttributeValue<string>("uniquename"));                            
+                            cB_Solutions.Items.Add(solution.GetAttributeValue<string>("uniquename"));
                         }
                     }
                 },
@@ -178,28 +180,25 @@ namespace XTBPlugin.SolutionTransformer
             });
         }
 
-        private void GetWebResources()
+        private void GetSolutionComponents()
         {
+            solutionBuilder = new SolutionBuilder(Service);
+
             WorkAsync(new WorkAsyncInfo
             {
-                Message = "Getting WebResources",
+                Message = "Getting Solution-Components",
                 Work = (worker, args) =>
                 {
-                    QueryExpression webResources = new QueryExpression("webresource")
+                    List<string> publisher = new List<string>();
+                    foreach (var item in clbPublisher.CheckedItems)
                     {
-                        TopCount = 50,
-                        ColumnSet = new ColumnSet("componentstate", "ishidden", "iscustomizable", "ismanaged", "webresourcetype", "name"),
-                        Criteria =
+                        if (clbPublisher.GetItemCheckState(clbPublisher.Items.IndexOf(item)) == CheckState.Checked)
                         {
-                            Conditions = {
-                                new ConditionExpression("ishidden", ConditionOperator.Equal, false),
-                                new ConditionExpression("ismanaged", ConditionOperator.Equal, false),
-                                new ConditionExpression("name", ConditionOperator.DoesNotBeginWith,  "cc_shared/")
-                            }
+                            publisher.Add(item.ToString());
                         }
-                    };
+                    }
 
-                    args.Result = Service.RetrieveMultiple(webResources);
+                    args.Result = solutionBuilder.CollectComponents(mySettings, publisher);
                 },
                 PostWorkCallBack = (args) =>
                 {
@@ -207,11 +206,10 @@ namespace XTBPlugin.SolutionTransformer
                     {
                         MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-                    var result = args.Result as EntityCollection;
-                    if (result != null)
+                    bool result = (bool)args.Result;
+                    if (result)
                     {
-                        WebResources = result.Entities.ToList().ToDictionary(x => x.Id);
-                        MessageBox.Show($"Found {result.Entities.Count} resources");
+                        MessageBox.Show($"Finshed successfully");
                     }
                 }
             });
@@ -224,22 +222,8 @@ namespace XTBPlugin.SolutionTransformer
                 Message = "Add To Solution",
                 Work = (worker, args) =>
                 {
-                    foreach (var webResource in WebResources)
-                    {
-                        AddSolutionComponentRequest addSolutionComponent = new AddSolutionComponentRequest
-                        {
-                            AddRequiredComponents = false,
-                            ComponentId = webResource.Key,
-                            ComponentType = 61,
-                            SolutionUniqueName = TargetSolution.GetAttributeValue<string>("uniquename")
-                        };
+                    args.Result = solutionBuilder.AddComponentsToSolution(TargetSolution.GetAttributeValue<string>("uniquename"));
 
-                        Service.Execute(addSolutionComponent);
-                    }
-
-                    //1d866466-a8be-ea11-a812-000d3a378a3a
-
-                    args.Result = true;
                 },
                 PostWorkCallBack = (args) =>
                 {
@@ -247,38 +231,10 @@ namespace XTBPlugin.SolutionTransformer
                     {
                         MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-                    //var result = args.Result as bool;
-                    //if (result != null)
-                    //{
-                    //    WebResources = result.Entities.ToList().ToDictionary(x => x.Id);
-                    MessageBox.Show($"Updated Solution");
-                    //}
-                }
-            });
-        }
-
-        private void GetAccounts()
-        {
-            WorkAsync(new WorkAsyncInfo
-            {
-                Message = "Getting accounts",
-                Work = (worker, args) =>
-                {
-                    args.Result = Service.RetrieveMultiple(new QueryExpression("account")
+                    bool result = (bool)args.Result;
+                    if (result)
                     {
-                        TopCount = 50
-                    });
-                },
-                PostWorkCallBack = (args) =>
-                {
-                    if (args.Error != null)
-                    {
-                        MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    var result = args.Result as EntityCollection;
-                    if (result != null)
-                    {
-                        MessageBox.Show($"Found {result.Entities.Count} accounts");
+                        MessageBox.Show($"Updated Solution");
                     }
                 }
             });

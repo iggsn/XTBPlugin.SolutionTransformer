@@ -66,11 +66,17 @@
     <Reference Include="System.Workflow.Runtime" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\ComponentBase.cs" />
+    <Compile Include="Components\Entities.cs" />
+    <Compile Include="Components\Enums.cs" />
+    <Compile Include="Components\IComponentBase.cs" />
+    <Compile Include="Components\WebResources.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SolutionBuilder.cs" />
     <Compile Include="SolutionTransformer.cs" />
     <Compile Include="SolutionTransformerControl.cs">
       <SubType>UserControl</SubType>

@@ -15,7 +15,15 @@ namespace XTBPlugin.SolutionTransformer
     /// </remarks>
     public class Settings
     {
+        [Browsable(false)]
         public string LastUsedOrganizationWebappUrl { get; set; }
+
+        [Browsable(true)]
+        [ReadOnly(false)]
+        [Category("EntityTypes")]
+        [DisplayName("Entity (1)")]
+        [Description("Will add Entities to the Target Solution.")]
+        public bool IncludeEntites { get; set; }
 
         [Browsable(true)]
         [ReadOnly(false)]
