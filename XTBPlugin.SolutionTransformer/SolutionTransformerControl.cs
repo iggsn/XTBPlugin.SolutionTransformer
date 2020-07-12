@@ -17,7 +17,16 @@ namespace XTBPlugin.SolutionTransformer
     {
         private Settings mySettings;
 
+        /// <summary>
+        /// Contains List of all unmanaged Solutions.
+        /// </summary>
         public Dictionary<string, Entity> SolutionEntities { get; set; } = new Dictionary<string, Entity>();
+
+        /// <summary>
+        /// Contains the Entity of the Selected Solution.
+        /// </summary>
+        private Entity TargetSolution;
+
         public Dictionary<Guid, Entity> PublisherEntities { get; set; } = new Dictionary<Guid, Entity>();
         public Dictionary<Guid, Entity> WebResources { get; set; } = new Dictionary<Guid, Entity>();
 
@@ -42,6 +51,8 @@ namespace XTBPlugin.SolutionTransformer
                 LogInfo("Settings found and loaded");
             }
 
+            pg_Settings.SelectedObject = mySettings;
+
             ExecuteMethod(LoadSolutions);
             ExecuteMethod(LoadPublisher);
         }
@@ -58,13 +69,30 @@ namespace XTBPlugin.SolutionTransformer
             ExecuteMethod(GetWebResources);
         }
 
+        /// <summary>
+        /// Loads only the unmanaged Solutions.
+        /// </summary>
         private void LoadSolutions()
         {
+            TargetSolution = null;
+            lbl_SelectedSolution.Text = "Selected Solution: -none-";
             cB_Solutions.Items.Clear();
+            cB_Solutions.SelectedIndex = -1;
+            cB_Solutions.Text = "";
 
             QueryExpression solutionsQuery = new QueryExpression("solution");
-            solutionsQuery.ColumnSet = new ColumnSet(true);
+            solutionsQuery.ColumnSet = new ColumnSet("solutionid", "uniquename", "friendlyname");
             solutionsQuery.Criteria.AddCondition("ismanaged", ConditionOperator.Equal, false);
+            solutionsQuery.Criteria.AddCondition("isvisible", ConditionOperator.Equal, true);
+            solutionsQuery.Criteria.AddCondition("parentsolutionid", ConditionOperator.Null);
+
+            var childSolutions = solutionsQuery.AddLink("solution", "solutionid", "parentsolutionid", JoinOperator.LeftOuter);
+
+            // Add columns to QEsolution_solution.Columns
+            childSolutions.Columns.AddColumns("uniquename");
+            childSolutions.LinkCriteria.AddCondition("solutionid", ConditionOperator.Null);
+
+            solutionsQuery.AddOrder("uniquename", OrderType.Ascending);
 
             WorkAsync(new WorkAsyncInfo
             {
@@ -90,7 +118,7 @@ namespace XTBPlugin.SolutionTransformer
                             if (solution.GetAttributeValue<string>("uniquename") == "Active" || solution.GetAttributeValue<string>("uniquename") == "Default" || solution.GetAttributeValue<string>("uniquename") == "Basic")
                                 continue;
 
-                            cB_Solutions.Items.Add(solution.GetAttributeValue<string>("uniquename"), CheckState.Checked);
+                             cB_Solutions.Items.Add(solution.GetAttributeValue<string>("uniquename"));                            
                         }
                     }
                 },
@@ -98,6 +126,9 @@ namespace XTBPlugin.SolutionTransformer
             });
         }
 
+        /// <summary>
+        /// Loads all Publishers, that are not readonly and have a prefix.
+        /// </summary>
         private void LoadPublisher()
         {
             cB_Solutions.Items.Clear();
@@ -139,7 +170,7 @@ namespace XTBPlugin.SolutionTransformer
                             if (string.IsNullOrEmpty(publisher.GetAttributeValue<string>("customizationprefix")) || clbPublisher.Items.Contains(publisher.GetAttributeValue<string>("customizationprefix")))
                                 continue;
 
-                            clbPublisher.Items.Add(publisher.GetAttributeValue<string>("customizationprefix"));
+                            clbPublisher.Items.Add(publisher.GetAttributeValue<string>("customizationprefix"), true);
                         }
                     }
                 },
@@ -200,7 +231,7 @@ namespace XTBPlugin.SolutionTransformer
                             AddRequiredComponents = false,
                             ComponentId = webResource.Key,
                             ComponentType = 61,
-                            SolutionUniqueName = "XrmToolBoxTest"
+                            SolutionUniqueName = TargetSolution.GetAttributeValue<string>("uniquename")
                         };
 
                         Service.Execute(addSolutionComponent);
@@ -253,6 +284,12 @@ namespace XTBPlugin.SolutionTransformer
             });
         }
 
+        public override void ClosingPlugin(PluginCloseInfo info)
+        {
+            SettingsManager.Instance.Save(GetType(), mySettings);
+            base.ClosingPlugin(info);
+        }
+
         /// <summary>
         /// This event occurs when the plugin is closed
         /// </summary>
@@ -276,6 +313,26 @@ namespace XTBPlugin.SolutionTransformer
                 mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;
                 LogInfo("Connection has changed to: {0}", detail.WebApplicationUrl);
             }
+        }
+
+        /// <summary>
+        /// Refresh the Solutions List
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_ReloadSolutions_Click(object sender, EventArgs e)
+        {
+            LoadSolutions();
+        }
+
+        private void cB_Solutions_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ComboBox solutionCbx = (ComboBox)sender;
+
+            string selectedItem = (string)solutionCbx.SelectedItem;
+            TargetSolution = SolutionEntities[selectedItem];
+
+            lbl_SelectedSolution.Text = $"Selected Solution: {TargetSolution.GetAttributeValue<string>("friendlyname")}";
         }
     }
 }

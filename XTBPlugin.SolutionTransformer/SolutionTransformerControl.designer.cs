@@ -36,7 +36,16 @@
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.cB_Solutions = new System.Windows.Forms.ComboBox();
             this.clbPublisher = new System.Windows.Forms.CheckedListBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.lbl_SelectedSolution = new System.Windows.Forms.Label();
+            this.btn_ReloadSolutions = new System.Windows.Forms.Button();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.pg_Settings = new System.Windows.Forms.PropertyGrid();
+            this.label2 = new System.Windows.Forms.Label();
             this.toolStripMenu.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripMenu
@@ -49,7 +58,7 @@
             this.toolStripButton1});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
-            this.toolStripMenu.Size = new System.Drawing.Size(559, 31);
+            this.toolStripMenu.Size = new System.Drawing.Size(703, 31);
             this.toolStripMenu.TabIndex = 4;
             this.toolStripMenu.Text = "toolStrip1";
             // 
@@ -88,32 +97,110 @@
             // 
             // cB_Solutions
             // 
+            this.cB_Solutions.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.cB_Solutions.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.cB_Solutions.FormattingEnabled = true;
-            this.cB_Solutions.Location = new System.Drawing.Point(14, 45);
+            this.cB_Solutions.Location = new System.Drawing.Point(6, 19);
             this.cB_Solutions.Name = "cB_Solutions";
-            this.cB_Solutions.Size = new System.Drawing.Size(193, 21);
+            this.cB_Solutions.Size = new System.Drawing.Size(222, 21);
+            this.cB_Solutions.Sorted = true;
             this.cB_Solutions.TabIndex = 5;
+            this.cB_Solutions.SelectedIndexChanged += new System.EventHandler(this.cB_Solutions_SelectedIndexChanged);
             // 
             // clbPublisher
             // 
             this.clbPublisher.FormattingEnabled = true;
-            this.clbPublisher.Location = new System.Drawing.Point(14, 83);
+            this.clbPublisher.Location = new System.Drawing.Point(116, 19);
             this.clbPublisher.Name = "clbPublisher";
             this.clbPublisher.Size = new System.Drawing.Size(193, 109);
+            this.clbPublisher.Sorted = true;
             this.clbPublisher.TabIndex = 6;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.lbl_SelectedSolution);
+            this.groupBox1.Controls.Add(this.btn_ReloadSolutions);
+            this.groupBox1.Controls.Add(this.cB_Solutions);
+            this.groupBox1.Location = new System.Drawing.Point(3, 34);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(319, 74);
+            this.groupBox1.TabIndex = 7;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Target Solution";
+            // 
+            // lbl_SelectedSolution
+            // 
+            this.lbl_SelectedSolution.AutoSize = true;
+            this.lbl_SelectedSolution.Location = new System.Drawing.Point(6, 43);
+            this.lbl_SelectedSolution.Name = "lbl_SelectedSolution";
+            this.lbl_SelectedSolution.Size = new System.Drawing.Size(126, 13);
+            this.lbl_SelectedSolution.TabIndex = 7;
+            this.lbl_SelectedSolution.Text = "Selected Solution: -none-";
+            // 
+            // btn_ReloadSolutions
+            // 
+            this.btn_ReloadSolutions.Location = new System.Drawing.Point(234, 19);
+            this.btn_ReloadSolutions.Name = "btn_ReloadSolutions";
+            this.btn_ReloadSolutions.Size = new System.Drawing.Size(75, 23);
+            this.btn_ReloadSolutions.TabIndex = 6;
+            this.btn_ReloadSolutions.Text = "Reload Solutions";
+            this.btn_ReloadSolutions.UseVisualStyleBackColor = true;
+            this.btn_ReloadSolutions.Click += new System.EventHandler(this.btn_ReloadSolutions_Click);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.label2);
+            this.groupBox2.Controls.Add(this.pg_Settings);
+            this.groupBox2.Controls.Add(this.label1);
+            this.groupBox2.Controls.Add(this.clbPublisher);
+            this.groupBox2.Location = new System.Drawing.Point(3, 114);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(319, 284);
+            this.groupBox2.TabIndex = 8;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Settings";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(10, 19);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(100, 13);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "Selected Publishers";
+            // 
+            // pg_Settings
+            // 
+            this.pg_Settings.Location = new System.Drawing.Point(116, 134);
+            this.pg_Settings.Name = "pg_Settings";
+            this.pg_Settings.Size = new System.Drawing.Size(193, 150);
+            this.pg_Settings.TabIndex = 8;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 134);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(45, 13);
+            this.label2.TabIndex = 9;
+            this.label2.Text = "Settings";
             // 
             // SolutionTransformerControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.clbPublisher);
-            this.Controls.Add(this.cB_Solutions);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.toolStripMenu);
             this.Name = "SolutionTransformerControl";
-            this.Size = new System.Drawing.Size(559, 300);
+            this.Size = new System.Drawing.Size(703, 468);
             this.Load += new System.EventHandler(this.SolutionTransformerControl_Load);
             this.toolStripMenu.ResumeLayout(false);
             this.toolStripMenu.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -127,5 +214,12 @@
         private System.Windows.Forms.ComboBox cB_Solutions;
         private System.Windows.Forms.ToolStripButton toolStripButton1;
         private System.Windows.Forms.CheckedListBox clbPublisher;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Button btn_ReloadSolutions;
+        private System.Windows.Forms.Label lbl_SelectedSolution;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.PropertyGrid pg_Settings;
     }
 }
