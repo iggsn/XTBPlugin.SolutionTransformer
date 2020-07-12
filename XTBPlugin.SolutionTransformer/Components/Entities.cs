@@ -31,7 +31,7 @@ namespace XTBPlugin.SolutionTransformer.Components
             {
                 foreach (EntityMetadata entity in entities.EntityMetadata)
                 {
-                    if (entity.IsManaged == false && publishers.Any(p => entity.SchemaName.StartsWith(p)))
+                    if (entity.IsManaged == false && publishers.Any(p => entity.SchemaName.StartsWith(p)) && entity.IsIntersect == false)
                     {
                         Components.Add(entity.MetadataId.Value, entity);
                     }
