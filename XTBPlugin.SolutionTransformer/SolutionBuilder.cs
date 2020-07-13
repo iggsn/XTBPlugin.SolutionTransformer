@@ -1,7 +1,9 @@
 ﻿using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Messages;
 
 using System.Collections.Generic;
+using System.Linq;
 
 using XTBPlugin.SolutionTransformer.Components;
 
@@ -44,7 +46,7 @@ namespace XTBPlugin.SolutionTransformer
             return true;
         }
 
-        public bool AddComponentsToSolution(string targetSolution)
+        public bool AddComponentsToSolution(string targetSolution, Settings mySettings)
         {
             List<AddSolutionComponentRequest> fullRequests = new List<AddSolutionComponentRequest>();
 
@@ -53,9 +55,57 @@ namespace XTBPlugin.SolutionTransformer
                 fullRequests.AddRange(componentTypes.Value.GetRequestList(targetSolution));
             }
 
-            foreach (var request in fullRequests)
+            if (mySettings.UseExecuteMultiple)
             {
-                service.Execute(request);
+                int pageNumber = 0;
+
+                do
+                {
+                    pageNumber++;
+
+                    var requestWithResults = new ExecuteMultipleRequest()
+                    {
+                        // Assign settings that define execution behavior: continue on error, return responses.
+                        Settings = new ExecuteMultipleSettings()
+                        {
+                            ContinueOnError = false,
+                            ReturnResponses = true
+                        },
+                        // Create an empty organization request collection.
+                        Requests = new OrganizationRequestCollection()
+                    };
+
+                    requestWithResults.Requests.AddRange(fullRequests.Skip(pageNumber * mySettings.ExecuteMultipleBatchSize).Take(mySettings.ExecuteMultipleBatchSize));
+
+                    ExecuteMultipleResponse responseWithResults = (ExecuteMultipleResponse)service.Execute(requestWithResults);
+
+                    if (responseWithResults.Responses.Any(r => r.Fault != null))
+                    {
+                        return false;
+                    }
+
+                    //// Display the results returned in the responses.
+                    //foreach (var responseItem in responseWithResults.Responses)
+                    //{
+                    //    // A valid response.
+                    //    if (responseItem.Response != null)
+                    //        DisplayResponse(requestWithResults.Requests[responseItem.RequestIndex], responseItem.Response);
+
+
+                    //    // An error has occurred.
+                    //    else if (responseItem.Fault != null)
+                    //        DisplayFault(requestWithResults.Requests[responseItem.RequestIndex],
+                    //        responseItem.RequestIndex, responseItem.Fault);
+                    //}
+
+                } while (fullRequests.Count() > pageNumber * mySettings.ExecuteMultipleBatchSize);
+            }
+            else
+            {
+                foreach (var request in fullRequests)
+                {
+                    service.Execute(request);
+                }
             }
 
             return true;

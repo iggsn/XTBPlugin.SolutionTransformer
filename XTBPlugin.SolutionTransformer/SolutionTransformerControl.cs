@@ -222,7 +222,7 @@ namespace XTBPlugin.SolutionTransformer
                 Message = "Add To Solution",
                 Work = (worker, args) =>
                 {
-                    args.Result = solutionBuilder.AddComponentsToSolution(TargetSolution.GetAttributeValue<string>("uniquename"));
+                    args.Result = solutionBuilder.AddComponentsToSolution(TargetSolution.GetAttributeValue<string>("uniquename"), mySettings);
 
                 },
                 PostWorkCallBack = (args) =>
