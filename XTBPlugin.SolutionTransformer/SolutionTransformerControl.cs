@@ -10,10 +10,13 @@ using System.Linq;
 using System.Windows.Forms;
 
 using XrmToolBox.Extensibility;
+using XrmToolBox.Extensibility.Args;
+using XrmToolBox.Extensibility.Interfaces;
+using XrmToolBox.PluginsStore;
 
 namespace XTBPlugin.SolutionTransformer
 {
-    public partial class SolutionTransformerControl : PluginControlBase
+    public partial class SolutionTransformerControl : PluginControlBase, IGitHubPlugin, IStatusBarMessenger
     {
         private Settings mySettings;
 
@@ -30,7 +33,17 @@ namespace XTBPlugin.SolutionTransformer
         public Dictionary<Guid, Entity> PublisherEntities { get; set; } = new Dictionary<Guid, Entity>();
         public Dictionary<Guid, Entity> WebResources { get; set; } = new Dictionary<Guid, Entity>();
 
+        #region IGitHubPlugin        
+        public string RepositoryName => "XTBPlugin.SolutionTransformer";
+
+        public string UserName => "iggsn";
+        #endregion
+
         public SolutionBuilder solutionBuilder;
+
+        #region IStatusBarMessenger
+        public event EventHandler<StatusBarMessageEventArgs> SendMessageToStatusBar;
+        #endregion
 
         public SolutionTransformerControl()
         {
@@ -189,6 +202,7 @@ namespace XTBPlugin.SolutionTransformer
                 Message = "Getting Solution-Components",
                 Work = (worker, args) =>
                 {
+
                     List<string> publisher = new List<string>();
                     foreach (var item in clbPublisher.CheckedItems)
                     {
@@ -198,20 +212,24 @@ namespace XTBPlugin.SolutionTransformer
                         }
                     }
 
-                    args.Result = solutionBuilder.CollectComponents(mySettings, publisher);
+                    SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Collect Solutions"));
+
+                    args.Result = solutionBuilder.CollectComponents(mySettings, publisher, worker.ReportProgress);
                 },
                 PostWorkCallBack = (args) =>
                 {
                     if (args.Error != null)
                     {
+                        SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Finished with Errors."));
                         MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     bool result = (bool)args.Result;
                     if (result)
                     {
-                        MessageBox.Show($"Finshed successfully");
-                    }
-                }
+                        SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Finished successfully."));
+                    }                    
+                },
+                ProgressChanged = e => { SetWorkingMessage(e.UserState.ToString()); }
             });
         }
 

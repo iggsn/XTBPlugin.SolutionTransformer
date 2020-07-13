@@ -2,6 +2,7 @@
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,17 +21,19 @@ namespace XTBPlugin.SolutionTransformer
             service = orgService;
         }
 
-        public bool CollectComponents(Settings settings, List<string> publisher)
+        public bool CollectComponents(Settings settings, List<string> publisher, Action<int, string> reportProgress)
         {
             Entities entities = new Entities();
             if (settings.IncludeEntites)
             {
+                reportProgress(0, "Collecting Entities...");
                 entities.FetchComponents(service, publisher);
                 ComponentDictionary.Add(ComponentType.Entity, entities);
             }
 
             if (settings.IncludeAttributes)
             {
+                reportProgress(0, "Collecting Attributes...");
                 Attributes attributes = new Attributes(entities);
                 attributes.FetchComponents(service, publisher);
                 ComponentDictionary.Add(ComponentType.Attributes, attributes);
@@ -38,6 +41,7 @@ namespace XTBPlugin.SolutionTransformer
 
             if (settings.IncludeWebResource)
             {
+                reportProgress(0, "Collecting WebResources...");
                 WebResources webResources = new WebResources();
                 webResources.FetchComponents(service, publisher);
                 ComponentDictionary.Add(ComponentType.WebResources, webResources);
