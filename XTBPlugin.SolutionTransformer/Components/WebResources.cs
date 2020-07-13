@@ -24,17 +24,26 @@ namespace XTBPlugin.SolutionTransformer.Components
                 ColumnSet = new ColumnSet("componentstate", "ishidden", "iscustomizable", "ismanaged", "webresourcetype", "name"),
                 Criteria =
                         {
+                            FilterOperator = LogicalOperator.And,
                             Conditions = {
                                 new ConditionExpression("ishidden", ConditionOperator.Equal, false),
                                 new ConditionExpression("ismanaged", ConditionOperator.Equal, false),
                                 new ConditionExpression("name", ConditionOperator.DoesNotBeginWith,  "cc_shared/")
-                            }
+                            },
+                            Filters =
+                                {
+                                     new FilterExpression
+                                     {
+                                         FilterOperator =LogicalOperator.Or,
+                                         Conditions = {}
+                                     }
+                                }
                         }
             };
 
             foreach (string publisher in publishers)
             {
-                queryWebResources.Criteria.AddCondition("name", ConditionOperator.BeginsWith, publisher);
+                queryWebResources.Criteria.Filters[0].AddCondition("name", ConditionOperator.BeginsWith, publisher);
             }
 
             EntityCollection webResources = service.RetrieveMultiple(queryWebResources);

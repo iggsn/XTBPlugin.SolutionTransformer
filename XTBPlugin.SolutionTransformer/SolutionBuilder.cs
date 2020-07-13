@@ -28,7 +28,10 @@ namespace XTBPlugin.SolutionTransformer
             {
                 reportProgress(0, "Collecting Entities...");
                 entities.FetchComponents(service, publisher);
-                ComponentDictionary.Add(ComponentType.Entity, entities);
+                ComponentDictionary.Add(entities.SubType, entities);
+            } else
+            {
+                ComponentDictionary.Add(entities.SubType, entities);
             }
 
             if (settings.IncludeAttributes)
@@ -36,7 +39,7 @@ namespace XTBPlugin.SolutionTransformer
                 reportProgress(0, "Collecting Attributes...");
                 Attributes attributes = new Attributes(entities);
                 attributes.FetchComponents(service, publisher);
-                ComponentDictionary.Add(ComponentType.Attributes, attributes);
+                ComponentDictionary.Add(attributes.SubType, attributes);
             }
 
             if (settings.IncludeWebResource)
@@ -44,14 +47,16 @@ namespace XTBPlugin.SolutionTransformer
                 reportProgress(0, "Collecting WebResources...");
                 WebResources webResources = new WebResources();
                 webResources.FetchComponents(service, publisher);
-                ComponentDictionary.Add(ComponentType.WebResources, webResources);
+                ComponentDictionary.Add(webResources.SubType, webResources);
             }
 
             return true;
         }
 
-        public bool AddComponentsToSolution(string targetSolution, Settings mySettings)
+        public bool AddComponentsToSolution(string targetSolution, Settings mySettings, Action<int, string> reportProgress)
         {
+            reportProgress(0, "Prepare AddSolutionComponentRequests...");
+
             List<AddSolutionComponentRequest> fullRequests = new List<AddSolutionComponentRequest>();
 
             foreach (KeyValuePair<ComponentType, IComponentBase> componentTypes in ComponentDictionary)
@@ -62,10 +67,13 @@ namespace XTBPlugin.SolutionTransformer
             if (mySettings.UseExecuteMultiple)
             {
                 int pageNumber = 0;
+                int maxPages = fullRequests.Count() / mySettings.ExecuteMultipleBatchSize + 1;
 
                 do
                 {
                     pageNumber++;
+
+                    reportProgress(maxPages / 100 * pageNumber, $"Adding page {pageNumber} of {maxPages} with {mySettings.ExecuteMultipleBatchSize} records...");
 
                     var requestWithResults = new ExecuteMultipleRequest()
                     {

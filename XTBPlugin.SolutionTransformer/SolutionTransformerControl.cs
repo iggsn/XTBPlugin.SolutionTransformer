@@ -202,7 +202,6 @@ namespace XTBPlugin.SolutionTransformer
                 Message = "Getting Solution-Components",
                 Work = (worker, args) =>
                 {
-
                     List<string> publisher = new List<string>();
                     foreach (var item in clbPublisher.CheckedItems)
                     {
@@ -212,7 +211,7 @@ namespace XTBPlugin.SolutionTransformer
                         }
                     }
 
-                    SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Collect Solutions"));
+                    SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Collect Solution Components"));
 
                     args.Result = solutionBuilder.CollectComponents(mySettings, publisher, worker.ReportProgress);
                 },
@@ -240,21 +239,25 @@ namespace XTBPlugin.SolutionTransformer
                 Message = "Add To Solution",
                 Work = (worker, args) =>
                 {
-                    args.Result = solutionBuilder.AddComponentsToSolution(TargetSolution.GetAttributeValue<string>("uniquename"), mySettings);
+                    SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Adding Components to Solution..."));
+
+                    args.Result = solutionBuilder.AddComponentsToSolution(TargetSolution.GetAttributeValue<string>("uniquename"), mySettings, worker.ReportProgress);
 
                 },
                 PostWorkCallBack = (args) =>
                 {
                     if (args.Error != null)
                     {
+                        SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Finished with Errors."));
                         MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     bool result = (bool)args.Result;
                     if (result)
                     {
-                        MessageBox.Show($"Updated Solution");
+                        SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Finished successfully."));
                     }
-                }
+                },
+                ProgressChanged = f => { SetWorkingMessage(f.UserState.ToString()); }
             });
         }
 
