@@ -20,11 +20,18 @@ namespace XTBPlugin.SolutionTransformer
 
         public bool CollectComponents(Settings settings, List<string> publisher)
         {
+            Entities entities = new Entities();
             if (settings.IncludeEntites)
             {
-                Entities entities = new Entities();
                 entities.FetchComponents(service, publisher);
                 ComponentDictionary.Add(ComponentType.Entity, entities);
+            }
+
+            if (settings.IncludeAttributes)
+            {
+                Attributes attributes = new Attributes(entities);
+                attributes.FetchComponents(service, publisher);
+                ComponentDictionary.Add(ComponentType.Attributes, attributes);
             }
 
             if (settings.IncludeWebResource)

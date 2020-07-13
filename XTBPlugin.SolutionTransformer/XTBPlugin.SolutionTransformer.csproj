@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\ComponentBase.cs" />
+    <Compile Include="Components\Attributes.cs" />
     <Compile Include="Components\Entities.cs" />
     <Compile Include="Components\Enums.cs" />
     <Compile Include="Components\IComponentBase.cs" />

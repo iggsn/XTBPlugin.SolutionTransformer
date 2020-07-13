@@ -2,7 +2,8 @@
 {
     public enum ComponentType
     {
-        Entity =1,
+        Entity = 1,
+        Attributes = 2,
         WebResources = 61
     }
 }

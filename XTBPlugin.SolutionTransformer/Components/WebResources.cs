@@ -21,7 +21,6 @@ namespace XTBPlugin.SolutionTransformer.Components
         {
             QueryExpression queryWebResources = new QueryExpression("webresource")
             {
-                TopCount = 50,
                 ColumnSet = new ColumnSet("componentstate", "ishidden", "iscustomizable", "ismanaged", "webresourcetype", "name"),
                 Criteria =
                         {

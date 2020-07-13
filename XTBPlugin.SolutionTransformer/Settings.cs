@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace XTBPlugin.SolutionTransformer
 {
@@ -24,6 +19,13 @@ namespace XTBPlugin.SolutionTransformer
         [DisplayName("Entity (1)")]
         [Description("Will add Entities to the Target Solution.")]
         public bool IncludeEntites { get; set; }
+
+        [Browsable(true)]
+        [ReadOnly(false)]
+        [Category("EntityTypes")]
+        [DisplayName("Attributes (2)")]
+        [Description("Will add Attributes to the Target Solution.")]
+        public bool IncludeAttributes { get; set; }
 
         [Browsable(true)]
         [ReadOnly(false)]
