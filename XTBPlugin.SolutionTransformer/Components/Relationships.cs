@@ -12,13 +12,13 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public class Relationships : ComponentBase
     {
-        public Dictionary<Guid, OneToManyRelationshipMetadata> Components;
+        public Dictionary<Guid, RelationshipMetadataBase> Components;
         public Entities Entities;
         public Attributes Attributes;
 
         public Relationships(Entities entities, Attributes attributes) : base(ComponentType.Relationships)
         {
-            Components = new Dictionary<Guid, OneToManyRelationshipMetadata>();
+            Components = new Dictionary<Guid, RelationshipMetadataBase>();
             Entities = entities;
             Attributes = attributes;
         }
@@ -50,40 +50,12 @@ namespace XTBPlugin.SolutionTransformer.Components
                 queryRelationships.Criteria.Filters[0].AddCondition("name", ConditionOperator.BeginsWith, publisher);
             }
 
-            EntityCollection result = service.RetrieveMultiple(queryRelationships);
-            Dictionary<string, Entity> relationshipEntityList = result.Entities.ToList().ToDictionary(x => x.GetAttributeValue<string>("name"));
-
             foreach (EntityMetadata entity in entityMetadata)
             {
                 if (entity.IsCustomizable.Value && entity.IsIntersect == false)
                 {
-                    IEnumerable<OneToManyRelationshipMetadata> relationships = entity.ManyToOneRelationships.Where(r => r.IsCustomRelationship.Value && publishers.Any(p => r.SchemaName.StartsWith(p)));
-
-                    if (relationships.Any())
-                    {
-                        if (!Entities.Components.ContainsKey(entity.MetadataId.Value))
-                        {
-                            Entities.Components.Add(entity.MetadataId.Value, entity);
-                        }
-
-                        foreach (OneToManyRelationshipMetadata relationship in relationships)
-                        {
-                            if (relationshipEntityList.ContainsKey(relationship.SchemaName))
-                            {
-                                Guid relationshipId = relationshipEntityList[relationship.SchemaName].Id;
-
-                                AttributeMetadata attribute = entityMetadata.First(e => e.LogicalName == relationship.ReferencedEntity).Attributes.First(a => a.LogicalName == relationship.ReferencedAttribute);
-                                if (!Attributes.Components.ContainsKey(attribute.MetadataId.Value))
-                                {
-                                    Attributes.Components.Add(attribute.MetadataId.Value, attribute);
-                                }
-
-                                Components.Add(relationshipId, relationship);
-                            }
-                        }
-                    }
-
-
+                    HandleOneToManyRelationships(publishers, entityMetadata, entity);
+                    HandleManyToManyRelationships(publishers, entityMetadata, entity);
                 }
             }
         }
@@ -104,6 +76,52 @@ namespace XTBPlugin.SolutionTransformer.Components
             }
 
             return list;
+        }
+
+        private void HandleOneToManyRelationships(List<string> publishers, EntityMetadata[] entityMetadata, EntityMetadata entity)
+        {
+            IEnumerable<OneToManyRelationshipMetadata> relationships = entity.OneToManyRelationships.Where(r => r.IsCustomRelationship.Value && publishers.Any(p => r.SchemaName.StartsWith(p)));
+
+            if (relationships.Any())
+            {
+                foreach (OneToManyRelationshipMetadata relationship in relationships)
+                {
+                    EntityMetadata entitySearch = entityMetadata.First(e => e.LogicalName == relationship.ReferencingEntity);
+                    if (!Entities.Components.ContainsKey(entitySearch.MetadataId.Value))
+                    {
+                        Entities.Components.Add(entitySearch.MetadataId.Value, entitySearch);
+                    }
+
+                    AttributeMetadata attributeSearch = entityMetadata.First(e => e.LogicalName == relationship.ReferencingEntity).Attributes.First(a => a.LogicalName == relationship.ReferencingAttribute);
+                    if (!Attributes.Components.ContainsKey(attributeSearch.MetadataId.Value))
+                    {
+                        Attributes.Components.Add(attributeSearch.MetadataId.Value, attributeSearch);
+                    }
+
+                    Components.Add(relationship.MetadataId.Value, relationship);
+                }
+            }
+        }
+
+        private void HandleManyToManyRelationships(List<string> publishers, EntityMetadata[] entityMetadata, EntityMetadata entity)
+        {
+            IEnumerable<ManyToManyRelationshipMetadata> relationships = entity.ManyToManyRelationships.Where(r => r.IsCustomRelationship.Value && publishers.Any(p => r.SchemaName.StartsWith(p)));
+
+            if (relationships.Any())
+            {
+                foreach (ManyToManyRelationshipMetadata relationship in relationships)
+                {
+                    if (!Entities.Components.ContainsKey(entity.MetadataId.Value))
+                    {
+                        Entities.Components.Add(entity.MetadataId.Value, entity);
+                    }
+
+                    if (!Components.ContainsKey(relationship.MetadataId.Value))
+                    {
+                        Components.Add(relationship.MetadataId.Value, relationship);
+                    }
+                }
+            }
         }
     }
 }

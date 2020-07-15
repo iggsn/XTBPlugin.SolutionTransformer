@@ -129,7 +129,7 @@ namespace XTBPlugin.SolutionTransformer
                         Requests = new OrganizationRequestCollection()
                     };
 
-                    requestWithResults.Requests.AddRange(fullRequests.Skip(pageNumber * mySettings.ExecuteMultipleBatchSize).Take(mySettings.ExecuteMultipleBatchSize));
+                    requestWithResults.Requests.AddRange(fullRequests.Skip((pageNumber-1) * mySettings.ExecuteMultipleBatchSize).Take(mySettings.ExecuteMultipleBatchSize));
 
                     ExecuteMultipleResponse responseWithResults = (ExecuteMultipleResponse)service.Execute(requestWithResults);
 

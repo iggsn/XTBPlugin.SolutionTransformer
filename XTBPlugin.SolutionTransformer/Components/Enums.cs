@@ -4,7 +4,7 @@
     {
         Entity = 1,
         Attributes = 2,
-        Relationships = 3,
+        Relationships = 10,
         WebResources = 61
     }
 }
