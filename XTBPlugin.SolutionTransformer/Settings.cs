@@ -41,12 +41,12 @@ namespace XTBPlugin.SolutionTransformer
         [Description("Will add Attributes to the Target Solution.")]
         public bool IncludeAttributes { get; set; }
 
-        //[Browsable(true)]
-        //[ReadOnly(false)]
-        //[Category("EntityTypes")]
-        //[DisplayName("Relationships (3)")]
-        //[Description("Includes Relationships.")]
-        //public bool IncludeRelationships { get; set; }
+        [Browsable(true)]
+        [ReadOnly(false)]
+        [Category("EntityTypes")]
+        [DisplayName("Relationships (3)")]
+        [Description("Includes Relationships.")]
+        public bool IncludeRelationships { get; set; }
 
         [Browsable(true)]
         [ReadOnly(false)]

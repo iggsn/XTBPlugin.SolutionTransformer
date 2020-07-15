@@ -1,6 +1,7 @@
 ﻿using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Metadata;
 
 using System;
 using System.Collections.Generic;
@@ -23,23 +24,45 @@ namespace XTBPlugin.SolutionTransformer
 
         public bool CollectComponents(Settings settings, List<string> publisher, Action<int, string> reportProgress)
         {
+            reportProgress(0, "Reading Entity Metadata");
+            EntityMetadata[] entityMetadata = GetEntityMetadata();
+            if (!entityMetadata.Any())
+            {
+                reportProgress(0, "Failed reading EntityMetadata!");
+                return false;
+            }
+
             Entities entities = new Entities();
             if (settings.IncludeEntites)
             {
                 reportProgress(0, "Collecting Entities...");
-                entities.FetchComponents(service, publisher);
+                entities.FetchComponents(service, publisher, entityMetadata);
                 ComponentDictionary.Add(entities.SubType, entities);
-            } else
+            }
+            else
             {
                 ComponentDictionary.Add(entities.SubType, entities);
             }
 
+            Attributes attributes = new Attributes(entities);
             if (settings.IncludeAttributes)
             {
                 reportProgress(0, "Collecting Attributes...");
-                Attributes attributes = new Attributes(entities);
-                attributes.FetchComponents(service, publisher);
+
+                attributes.FetchComponents(service, publisher, entityMetadata);
                 ComponentDictionary.Add(attributes.SubType, attributes);
+            }
+            else
+            {
+                ComponentDictionary.Add(attributes.SubType, attributes);
+            }
+
+            if (settings.IncludeRelationships)
+            {
+                reportProgress(0, "Collecting Relationships...");
+                Relationships relationships = new Relationships(entities, attributes);
+                relationships.FetchComponents(service, publisher, entityMetadata);
+                ComponentDictionary.Add(relationships.SubType, relationships);
             }
 
             if (settings.IncludeWebResource)
@@ -51,6 +74,25 @@ namespace XTBPlugin.SolutionTransformer
             }
 
             return true;
+        }
+
+        public EntityMetadata[] GetEntityMetadata()
+        {
+            var request = new RetrieveAllEntitiesRequest
+            {
+                EntityFilters = EntityFilters.All
+            };
+
+            RetrieveAllEntitiesResponse entities = (RetrieveAllEntitiesResponse)service.Execute(request);
+
+            if (entities.EntityMetadata.Any())
+            {
+                return entities.EntityMetadata;
+            }
+            else
+            {
+                return new EntityMetadata[0];
+            }
         }
 
         public bool AddComponentsToSolution(string targetSolution, Settings mySettings, Action<int, string> reportProgress)

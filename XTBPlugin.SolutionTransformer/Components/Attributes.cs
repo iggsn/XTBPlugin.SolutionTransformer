@@ -1,6 +1,5 @@
 ﻿using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 
 using System;
@@ -20,40 +19,25 @@ namespace XTBPlugin.SolutionTransformer.Components
             Entities = entities;
         }
 
-        public override void FetchComponents(IOrganizationService service, List<string> publishers)
+        public override void FetchComponents(IOrganizationService service, List<string> publishers, EntityMetadata[] entityMetadata)
         {
-            var request = new RetrieveAllEntitiesRequest
+            foreach (EntityMetadata entity in entityMetadata)
             {
-                EntityFilters = EntityFilters.Attributes
-            };
-
-            RetrieveAllEntitiesResponse entities = (RetrieveAllEntitiesResponse)service.Execute(request);
-
-            if (entities.EntityMetadata.Any())
-            {
-                foreach (EntityMetadata entity in entities.EntityMetadata)
+                if (entity.IsCustomizable.Value && entity.IsIntersect == false)
                 {
-                    if (entity.IsCustomizable.Value && entity.IsIntersect == false)
+                    IEnumerable<AttributeMetadata> attributes = entity.Attributes.Where(a => a.IsCustomAttribute.Value && publishers.Any(p => a.SchemaName.StartsWith(p)));
+
+                    if (attributes.Any())
                     {
-                        IEnumerable<AttributeMetadata> attributes = entity.Attributes.Where(a => a.IsCustomAttribute.Value && publishers.Any(p => a.SchemaName.StartsWith(p)));
-
-                        if (attributes.Any())
+                        if (!Entities.Components.ContainsKey(entity.MetadataId.Value))
                         {
-                            if (!Entities.Components.ContainsKey(entity.MetadataId.Value))
-                            {
-                                Entities.Components.Add(entity.MetadataId.Value, entity);
-                            }
-
-                            foreach (AttributeMetadata attribute in attributes)
-                            {
-                                //if (attribute.IsCustomAttribute.Value && publishers.Any(p => attribute.SchemaName.StartsWith(p)))
-                                //{
-                                Components.Add(attribute.MetadataId.Value, attribute);
-                                //}
-                            }
+                            Entities.Components.Add(entity.MetadataId.Value, entity);
                         }
 
-
+                        foreach (AttributeMetadata attribute in attributes)
+                        {
+                            Components.Add(attribute.MetadataId.Value, attribute);
+                        }
                     }
                 }
             }

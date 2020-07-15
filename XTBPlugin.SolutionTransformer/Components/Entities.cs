@@ -1,6 +1,5 @@
 ﻿using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 
 using System;
@@ -18,23 +17,13 @@ namespace XTBPlugin.SolutionTransformer.Components
             Components = new Dictionary<Guid, EntityMetadata>();
         }
 
-        public override void FetchComponents(IOrganizationService service, List<string> publishers)
+        public override void FetchComponents(IOrganizationService service, List<string> publishers, EntityMetadata[] entityMetadata)
         {
-            var request = new RetrieveAllEntitiesRequest
+            foreach (EntityMetadata entity in entityMetadata)
             {
-                EntityFilters = EntityFilters.Entity
-            };
-
-            RetrieveAllEntitiesResponse entities = (RetrieveAllEntitiesResponse)service.Execute(request);
-
-            if (entities.EntityMetadata.Any())
-            {
-                foreach (EntityMetadata entity in entities.EntityMetadata)
+                if (entity.IsManaged == false && publishers.Any(p => entity.SchemaName.StartsWith(p)) && entity.IsIntersect == false)
                 {
-                    if (entity.IsManaged == false && publishers.Any(p => entity.SchemaName.StartsWith(p)) && entity.IsIntersect == false)
-                    {
-                        Components.Add(entity.MetadataId.Value, entity);
-                    }
+                    Components.Add(entity.MetadataId.Value, entity);
                 }
             }
         }
