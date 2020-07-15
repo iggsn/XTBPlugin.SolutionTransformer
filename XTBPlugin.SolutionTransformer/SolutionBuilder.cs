@@ -24,45 +24,56 @@ namespace XTBPlugin.SolutionTransformer
 
         public bool CollectComponents(Settings settings, List<string> publisher, Action<int, string> reportProgress)
         {
-            reportProgress(0, "Reading Entity Metadata");
-            EntityMetadata[] entityMetadata = GetEntityMetadata();
-            if (!entityMetadata.Any())
+            if (settings.IncludeEntites || settings.IncludeAttributes || settings.IncludeRelationships)
             {
-                reportProgress(0, "Failed reading EntityMetadata!");
-                return false;
+                reportProgress(0, "Reading Entity Metadata");
+                EntityMetadata[] entityMetadata = GetEntityMetadata();
+                if (!entityMetadata.Any())
+                {
+                    reportProgress(0, "Failed reading EntityMetadata!");
+                    return false;
+                }
+
+                Entities entities = new Entities();
+                if (settings.IncludeEntites)
+                {
+                    reportProgress(0, "Collecting Entities...");
+                    entities.FetchComponents(service, publisher, entityMetadata);
+                    ComponentDictionary.Add(entities.SubType, entities);
+                }
+                else
+                {
+                    ComponentDictionary.Add(entities.SubType, entities);
+                }
+
+                Attributes attributes = new Attributes(entities);
+                if (settings.IncludeAttributes)
+                {
+                    reportProgress(0, "Collecting Attributes...");
+
+                    attributes.FetchComponents(service, publisher, entityMetadata);
+                    ComponentDictionary.Add(attributes.SubType, attributes);
+                }
+                else
+                {
+                    ComponentDictionary.Add(attributes.SubType, attributes);
+                }
+
+                if (settings.IncludeRelationships)
+                {
+                    reportProgress(0, "Collecting Relationships...");
+                    Relationships relationships = new Relationships(entities, attributes);
+                    relationships.FetchComponents(service, publisher, entityMetadata);
+                    ComponentDictionary.Add(relationships.SubType, relationships);
+                }
             }
 
-            Entities entities = new Entities();
-            if (settings.IncludeEntites)
+            if (settings.IncludeOptionsets)
             {
-                reportProgress(0, "Collecting Entities...");
-                entities.FetchComponents(service, publisher, entityMetadata);
-                ComponentDictionary.Add(entities.SubType, entities);
-            }
-            else
-            {
-                ComponentDictionary.Add(entities.SubType, entities);
-            }
-
-            Attributes attributes = new Attributes(entities);
-            if (settings.IncludeAttributes)
-            {
-                reportProgress(0, "Collecting Attributes...");
-
-                attributes.FetchComponents(service, publisher, entityMetadata);
-                ComponentDictionary.Add(attributes.SubType, attributes);
-            }
-            else
-            {
-                ComponentDictionary.Add(attributes.SubType, attributes);
-            }
-
-            if (settings.IncludeRelationships)
-            {
-                reportProgress(0, "Collecting Relationships...");
-                Relationships relationships = new Relationships(entities, attributes);
-                relationships.FetchComponents(service, publisher, entityMetadata);
-                ComponentDictionary.Add(relationships.SubType, relationships);
+                reportProgress(0, "Collecting OptionSets...");
+                OptionSets optionsets = new OptionSets();
+                optionsets.FetchComponents(service, publisher);
+                ComponentDictionary.Add(optionsets.SubType, optionsets);
             }
 
             if (settings.IncludeWebResource)
@@ -129,7 +140,7 @@ namespace XTBPlugin.SolutionTransformer
                         Requests = new OrganizationRequestCollection()
                     };
 
-                    requestWithResults.Requests.AddRange(fullRequests.Skip((pageNumber-1) * mySettings.ExecuteMultipleBatchSize).Take(mySettings.ExecuteMultipleBatchSize));
+                    requestWithResults.Requests.AddRange(fullRequests.Skip((pageNumber - 1) * mySettings.ExecuteMultipleBatchSize).Take(mySettings.ExecuteMultipleBatchSize));
 
                     ExecuteMultipleResponse responseWithResults = (ExecuteMultipleResponse)service.Execute(requestWithResults);
 

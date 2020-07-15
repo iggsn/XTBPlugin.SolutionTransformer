@@ -1,6 +1,5 @@
 ﻿using McTools.Xrm.Connection;
 
-using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
@@ -12,7 +11,6 @@ using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Args;
 using XrmToolBox.Extensibility.Interfaces;
-using XrmToolBox.PluginsStore;
 
 namespace XTBPlugin.SolutionTransformer
 {
@@ -135,6 +133,15 @@ namespace XTBPlugin.SolutionTransformer
 
                             cB_Solutions.Items.Add(solution.GetAttributeValue<string>("uniquename"));
                         }
+
+                        // load last solution
+                        if (!string.IsNullOrEmpty(mySettings.LastTargetSolutionName))
+                        {
+                            if (cB_Solutions.Items.Contains(mySettings.LastTargetSolutionName))
+                            {
+                                cB_Solutions.SelectedItem = mySettings.LastTargetSolutionName;
+                            }
+                        }
                     }
                 },
 
@@ -226,7 +233,7 @@ namespace XTBPlugin.SolutionTransformer
                     if (result)
                     {
                         SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Finished successfully."));
-                    }                    
+                    }
                 },
                 ProgressChanged = e => { SetWorkingMessage(e.UserState.ToString()); }
             });
@@ -310,6 +317,8 @@ namespace XTBPlugin.SolutionTransformer
             TargetSolution = SolutionEntities[selectedItem];
 
             lbl_SelectedSolution.Text = $"Selected Solution: {TargetSolution.GetAttributeValue<string>("friendlyname")}";
+
+            mySettings.LastTargetSolutionName = selectedItem;
         }
     }
 }

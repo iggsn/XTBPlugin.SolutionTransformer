@@ -4,6 +4,7 @@
     {
         Entity = 1,
         Attributes = 2,
+        OptionSets = 9,
         Relationships = 10,
         WebResources = 61
     }

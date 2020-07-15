@@ -14,6 +14,13 @@ namespace XTBPlugin.SolutionTransformer
         public string LastUsedOrganizationWebappUrl { get; set; }
 
         [Browsable(true)]
+        [ReadOnly(true)]
+        [Category("Internal Settings")]
+        [DisplayName("Last Solution")]
+        [Description("Stores the last Solution you used.")]
+        public string LastTargetSolutionName { get; set; }
+
+        [Browsable(true)]
         [ReadOnly(false)]
         [Category("Settings")]
         [DisplayName("Use ExecuteMultiple")]
@@ -44,7 +51,14 @@ namespace XTBPlugin.SolutionTransformer
         [Browsable(true)]
         [ReadOnly(false)]
         [Category("EntityTypes")]
-        [DisplayName("Relationships (3)")]
+        [DisplayName("Optionsets (9)")]
+        [Description("Includes Optionsets.")]
+        public bool IncludeOptionsets { get; set; }
+
+        [Browsable(true)]
+        [ReadOnly(false)]
+        [Category("EntityTypes")]
+        [DisplayName("Relationships (10)")]
         [Description("Includes Relationships.")]
         public bool IncludeRelationships { get; set; }
 

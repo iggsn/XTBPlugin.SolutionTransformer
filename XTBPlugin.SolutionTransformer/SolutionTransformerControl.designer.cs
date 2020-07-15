@@ -40,9 +40,9 @@
             this.lbl_SelectedSolution = new System.Windows.Forms.Label();
             this.btn_ReloadSolutions = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.pg_Settings = new System.Windows.Forms.PropertyGrid();
             this.label2 = new System.Windows.Forms.Label();
+            this.pg_Settings = new System.Windows.Forms.PropertyGrid();
+            this.label1 = new System.Windows.Forms.Label();
             this.toolStripMenu.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -149,32 +149,18 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.pg_Settings);
             this.groupBox2.Controls.Add(this.label1);
             this.groupBox2.Controls.Add(this.clbPublisher);
             this.groupBox2.Location = new System.Drawing.Point(3, 114);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(319, 284);
+            this.groupBox2.Size = new System.Drawing.Size(319, 351);
             this.groupBox2.TabIndex = 8;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Settings";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(10, 19);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(100, 13);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "Selected Publishers";
-            // 
-            // pg_Settings
-            // 
-            this.pg_Settings.Location = new System.Drawing.Point(116, 134);
-            this.pg_Settings.Name = "pg_Settings";
-            this.pg_Settings.Size = new System.Drawing.Size(193, 150);
-            this.pg_Settings.TabIndex = 8;
             // 
             // label2
             // 
@@ -184,6 +170,24 @@
             this.label2.Size = new System.Drawing.Size(45, 13);
             this.label2.TabIndex = 9;
             this.label2.Text = "Settings";
+            // 
+            // pg_Settings
+            // 
+            this.pg_Settings.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.pg_Settings.Location = new System.Drawing.Point(116, 134);
+            this.pg_Settings.Name = "pg_Settings";
+            this.pg_Settings.Size = new System.Drawing.Size(193, 211);
+            this.pg_Settings.TabIndex = 8;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(10, 19);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(100, 13);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "Selected Publishers";
             // 
             // SolutionTransformerControl
             // 
