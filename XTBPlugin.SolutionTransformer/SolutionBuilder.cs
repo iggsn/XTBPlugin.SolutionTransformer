@@ -84,6 +84,22 @@ namespace XTBPlugin.SolutionTransformer
                 ComponentDictionary.Add(webResources.SubType, webResources);
             }
 
+            if (settings.IncludePluginAssembly)
+            {
+                reportProgress(0, "Collecting PluginAssemblies...");
+                PluginAssemblies pluginAssemblies = new PluginAssemblies();
+                pluginAssemblies.FetchComponents(service, publisher);
+                ComponentDictionary.Add(pluginAssemblies.SubType, pluginAssemblies);
+            }
+
+            if (settings.IncludePluginTypes)
+            {
+                reportProgress(0, "Collecting PluginTypes...");
+                PluginTypes pluginTypes = new PluginTypes();
+                pluginTypes.FetchComponents(service, publisher);
+                ComponentDictionary.Add(pluginTypes.SubType, pluginTypes);
+            }
+
             return true;
         }
 

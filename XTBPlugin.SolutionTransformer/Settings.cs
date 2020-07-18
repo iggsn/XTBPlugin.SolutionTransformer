@@ -68,5 +68,19 @@ namespace XTBPlugin.SolutionTransformer
         [DisplayName("WebResources (61)")]
         [Description("Will add WebResources to the Target Solution.")]
         public bool IncludeWebResource { get; set; }
+
+        [Browsable(true)]
+        [ReadOnly(false)]
+        [Category("EntityTypes")]
+        [DisplayName("PluginTypes (90)")]
+        [Description("Will add Plugin Assemblies to the Target Solution.")]
+        public bool IncludePluginTypes { get; set; }
+
+        [Browsable(true)]
+        [ReadOnly(false)]
+        [Category("EntityTypes")]
+        [DisplayName("PluginAssembly (91)")]
+        [Description("Will add Plugin Assemblies to the Target Solution.")]
+        public bool IncludePluginAssembly { get; set; }
     }
 }

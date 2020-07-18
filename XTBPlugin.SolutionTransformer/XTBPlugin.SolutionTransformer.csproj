@@ -66,6 +66,7 @@
     <Reference Include="System.Workflow.Runtime" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\PluginTypes.cs" />
     <Compile Include="Components\Relationships.cs" />
     <Compile Include="Components\ComponentBase.cs" />
     <Compile Include="Components\Attributes.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Components\Enums.cs" />
     <Compile Include="Components\IComponentBase.cs" />
     <Compile Include="Components\OptionSets.cs" />
+    <Compile Include="Components\PluginAssemblies.cs" />
     <Compile Include="Components\WebResources.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
