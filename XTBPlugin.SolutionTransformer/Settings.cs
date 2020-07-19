@@ -64,6 +64,13 @@ namespace XTBPlugin.SolutionTransformer
 
         [Browsable(true)]
         [ReadOnly(false)]
+        [Category("SystemForms")]
+        [DisplayName("SystemForms (60)")]
+        [Description("Will add Systemforms to the Target Solution.")]
+        public bool IncludeSystemforms { get; set; }
+
+        [Browsable(true)]
+        [ReadOnly(false)]
         [Category("EntityTypes")]
         [DisplayName("WebResources (61)")]
         [Description("Will add WebResources to the Target Solution.")]
@@ -72,15 +79,8 @@ namespace XTBPlugin.SolutionTransformer
         [Browsable(true)]
         [ReadOnly(false)]
         [Category("EntityTypes")]
-        [DisplayName("PluginTypes (90)")]
-        [Description("Will add Plugin Assemblies to the Target Solution.")]
-        public bool IncludePluginTypes { get; set; }
-
-        [Browsable(true)]
-        [ReadOnly(false)]
-        [Category("EntityTypes")]
         [DisplayName("PluginAssembly (91)")]
-        [Description("Will add Plugin Assemblies to the Target Solution.")]
+        [Description("Will add Plugin Assemblies and their types to the Target Solution.")]
         public bool IncludePluginAssembly { get; set; }
     }
 }

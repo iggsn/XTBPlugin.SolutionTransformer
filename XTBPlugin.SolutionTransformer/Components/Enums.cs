@@ -10,7 +10,9 @@
         Attributes = 2,
         OptionSets = 9,
         Relationships = 10,
+        SystemForms = 60,
         WebResources = 61,
+        //automatically included in PluginAssemblies
         PluginTypes = 90,
         PluginAssemblies = 91
     }

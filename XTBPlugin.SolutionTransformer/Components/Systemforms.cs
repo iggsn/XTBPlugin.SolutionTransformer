@@ -1,5 +1,6 @@
 ﻿using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
 
 using System;
@@ -8,27 +9,29 @@ using System.Linq;
 
 namespace XTBPlugin.SolutionTransformer.Components
 {
-    public class PluginTypes : ComponentBase
+    public class SystemForms : ComponentBase
     {
         public Dictionary<Guid, Entity> Components;
 
-        public PluginTypes() : base(ComponentType.PluginTypes)
+        public SystemForms() : base(ComponentType.SystemForms)
         {
             Components = new Dictionary<Guid, Entity>();
         }
 
-        public override void FetchComponents(IOrganizationService service, List<string> publishers)
+        public override void FetchComponents(IOrganizationService service, List<string> publishers, EntityMetadata[] entityMetadata)
         {
-            QueryExpression queryPluginTypes = new QueryExpression("plugintype")
+            QueryExpression querySystemForms = new QueryExpression("systemform")
             {
-                ColumnSet = new ColumnSet(true),
+                ColumnSet = new ColumnSet("systemformid", "solutionid", "publishedon", "iscustomizable"),
                 Criteria =
                         {
                             FilterOperator = LogicalOperator.And,
                             Conditions = {
-                                //new ConditionExpression("ishidden", ConditionOperator.Equal, false),
+                                new ConditionExpression("objecttypecode", ConditionOperator.NotEqual, "none"),
                                 new ConditionExpression("ismanaged", ConditionOperator.Equal, false),
-                                new ConditionExpression("componentstate", ConditionOperator.Equal, 0)
+                                new ConditionExpression("iscustomizable", ConditionOperator.Equal, true),
+                                new ConditionExpression("componentstate", ConditionOperator.Equal, 0),
+                                new ConditionExpression("objecttypecode", ConditionOperator.Equal, "account")
                             },
                             Filters =
                                 {
@@ -46,11 +49,11 @@ namespace XTBPlugin.SolutionTransformer.Components
                 queryWebResources.Criteria.Filters[0].AddCondition("name", ConditionOperator.BeginsWith, publisher);
             }*/
 
-            EntityCollection pluginTypes = service.RetrieveMultiple(queryPluginTypes);
+            EntityCollection systemForms = service.RetrieveMultiple(querySystemForms);
 
-            if (pluginTypes.Entities.Any())
+            if (systemForms.Entities.Any())
             {
-                Components = pluginTypes.Entities.ToList().ToDictionary(x => x.Id);
+                Components = systemForms.Entities.ToList().ToDictionary(x => x.Id);
             }
         }
 

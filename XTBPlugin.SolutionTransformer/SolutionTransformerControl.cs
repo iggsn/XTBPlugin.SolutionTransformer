@@ -186,6 +186,7 @@ namespace XTBPlugin.SolutionTransformer
                     var result = args.Result as EntityCollection;
                     if (result != null)
                     {
+                        LogInfo("Retreived Publishers");
                         PublisherEntities = result.Entities.ToList().ToDictionary(x => x.Id);
                         foreach (Entity publisher in result.Entities)
                         {
@@ -193,10 +194,10 @@ namespace XTBPlugin.SolutionTransformer
                                 continue;
 
                             clbPublisher.Items.Add(publisher.GetAttributeValue<string>("customizationprefix"), true);
+                            LogInfo($"Added Publisher with prefix {publisher.GetAttributeValue<string>("customizationprefix")}");
                         }
                     }
                 },
-
             });
         }
 
@@ -209,6 +210,7 @@ namespace XTBPlugin.SolutionTransformer
                 Message = "Getting Solution-Components",
                 Work = (worker, args) =>
                 {
+                    LogInfo("Collecting Solution Items...");
                     List<string> publisher = new List<string>();
                     foreach (var item in clbPublisher.CheckedItems)
                     {
@@ -220,7 +222,7 @@ namespace XTBPlugin.SolutionTransformer
 
                     SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Collect Solution Components"));
 
-                    args.Result = solutionBuilder.CollectComponents(mySettings, publisher, worker.ReportProgress);
+                    args.Result = solutionBuilder.CollectComponents(mySettings, publisher, worker.ReportProgress, LogInfo);
                 },
                 PostWorkCallBack = (args) =>
                 {

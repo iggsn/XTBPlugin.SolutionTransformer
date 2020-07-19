@@ -66,7 +66,7 @@
     <Reference Include="System.Workflow.Runtime" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\PluginTypes.cs" />
+    <Compile Include="Components\SystemForms.cs" />
     <Compile Include="Components\Relationships.cs" />
     <Compile Include="Components\ComponentBase.cs" />
     <Compile Include="Components\Attributes.cs" />
