@@ -222,7 +222,7 @@ namespace XTBPlugin.SolutionTransformer
 
                     SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Collect Solution Components"));
 
-                    args.Result = solutionBuilder.CollectComponents(mySettings, publisher, worker.ReportProgress, LogInfo);
+                    args.Result = solutionBuilder.CollectComponents(mySettings, publisher, worker.ReportProgress);
                 },
                 PostWorkCallBack = (args) =>
                 {

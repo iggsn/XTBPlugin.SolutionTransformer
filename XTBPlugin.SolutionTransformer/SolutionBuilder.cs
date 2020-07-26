@@ -22,7 +22,7 @@ namespace XTBPlugin.SolutionTransformer
             service = orgService;
         }
 
-        public bool CollectComponents(Settings settings, List<string> publisher, Action<int, string> reportProgress, Action<string, object[]>logInfo)
+        public bool CollectComponents(Settings settings, List<string> publisher, Action<int, string> reportProgress)
         {
             if (settings.IncludeEntites || settings.IncludeAttributes || settings.IncludeRelationships || settings.IncludeSystemforms)
             {
@@ -37,11 +37,9 @@ namespace XTBPlugin.SolutionTransformer
                 Entities entities = new Entities();
                 if (settings.IncludeEntites)
                 {
-                    logInfo("Collecting Entities", null);
                     reportProgress(0, "Collecting Entities...");
                     entities.FetchComponents(service, publisher, entityMetadata);
                     ComponentDictionary.Add(entities.SubType, entities);
-                    logInfo($"Collected {entities.Components.Count} entities", null);
                 }
                 else
                 {
