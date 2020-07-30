@@ -33,7 +33,7 @@
             this.tsbClose = new System.Windows.Forms.ToolStripButton();
             this.tssSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbRefresh = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+            this.tsbAddToSolution = new System.Windows.Forms.ToolStripButton();
             this.cB_Solutions = new System.Windows.Forms.ComboBox();
             this.clbPublisher = new System.Windows.Forms.CheckedListBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -55,7 +55,7 @@
             this.tsbClose,
             this.tssSeparator1,
             this.tsbRefresh,
-            this.toolStripButton1});
+            this.tsbAddToSolution});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Size = new System.Drawing.Size(703, 31);
@@ -85,15 +85,15 @@
             this.tsbRefresh.Text = "Refresh";
             this.tsbRefresh.Click += new System.EventHandler(this.tsbResfresh_Click);
             // 
-            // toolStripButton1
+            // tsbAddToSolution
             // 
-            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
-            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(95, 28);
-            this.toolStripButton1.Text = "Add To Solution";
-            this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
+            this.tsbAddToSolution.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbAddToSolution.Image = ((System.Drawing.Image)(resources.GetObject("tsbAddToSolution.Image")));
+            this.tsbAddToSolution.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbAddToSolution.Name = "tsbAddToSolution";
+            this.tsbAddToSolution.Size = new System.Drawing.Size(95, 28);
+            this.tsbAddToSolution.Text = "Add To Solution";
+            this.tsbAddToSolution.Click += new System.EventHandler(this.tsbAddToSolution_Click);
             // 
             // cB_Solutions
             // 
@@ -216,7 +216,7 @@
         private System.Windows.Forms.ToolStripButton tsbRefresh;
         private System.Windows.Forms.ToolStripSeparator tssSeparator1;
         private System.Windows.Forms.ComboBox cB_Solutions;
-        private System.Windows.Forms.ToolStripButton toolStripButton1;
+        private System.Windows.Forms.ToolStripButton tsbAddToSolution;
         private System.Windows.Forms.CheckedListBox clbPublisher;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button btn_ReloadSolutions;

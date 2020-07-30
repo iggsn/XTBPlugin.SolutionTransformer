@@ -66,6 +66,9 @@ namespace XTBPlugin.SolutionTransformer
 
             pg_Settings.SelectedObject = mySettings;
 
+            tsbRefresh.Enabled = false;
+            tsbAddToSolution.Enabled = false;
+
             ExecuteMethod(LoadSolutions);
             ExecuteMethod(LoadPublisher);
         }
@@ -87,6 +90,8 @@ namespace XTBPlugin.SolutionTransformer
         /// </summary>
         private void LoadSolutions()
         {
+            tsbRefresh.Enabled = false;
+            tsbAddToSolution.Enabled = false;
             TargetSolution = null;
             lbl_SelectedSolution.Text = "Selected Solution: -none-";
             cB_Solutions.Items.Clear();
@@ -140,6 +145,7 @@ namespace XTBPlugin.SolutionTransformer
                             if (cB_Solutions.Items.Contains(mySettings.LastTargetSolutionName))
                             {
                                 cB_Solutions.SelectedItem = mySettings.LastTargetSolutionName;
+                                tsbRefresh.Enabled = true;
                             }
                         }
                     }
@@ -234,6 +240,7 @@ namespace XTBPlugin.SolutionTransformer
                     bool result = (bool)args.Result;
                     if (result)
                     {
+                        tsbAddToSolution.Enabled = true;
                         SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Finished successfully."));
                     }
                 },
@@ -241,7 +248,7 @@ namespace XTBPlugin.SolutionTransformer
             });
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
+        private void tsbAddToSolution_Click(object sender, EventArgs e)
         {
             WorkAsync(new WorkAsyncInfo
             {
@@ -319,6 +326,8 @@ namespace XTBPlugin.SolutionTransformer
             TargetSolution = SolutionEntities[selectedItem];
 
             lbl_SelectedSolution.Text = $"Selected Solution: {TargetSolution.GetAttributeValue<string>("friendlyname")}";
+
+            tsbRefresh.Enabled = true;
 
             mySettings.LastTargetSolutionName = selectedItem;
         }
