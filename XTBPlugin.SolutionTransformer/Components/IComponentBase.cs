@@ -10,5 +10,9 @@ namespace XTBPlugin.SolutionTransformer.Components
         List<AddSolutionComponentRequest> GetRequestList(string solutionUniqueName);
 
         void FetchComponents(IOrganizationService service, List<string> publishers);
+
+        void FetchComponents(IOrganizationService service, List<string> publishers, ComponentBase components1);
+
+        void FetchComponents(IOrganizationService service, List<string> publishers, ComponentBase components1, ComponentBase components2);
     }
 }

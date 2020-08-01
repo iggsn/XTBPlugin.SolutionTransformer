@@ -9,16 +9,14 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public class Relationships : ComponentBase
     {
-        public Entities Entities;
-        public Attributes Attributes;
+        public EntityMetadata[] EntityMetadata;
 
-        public Relationships(Entities entities, Attributes attributes) : base()
+        public Relationships(EntityMetadata[] entityMetadata) : base()
         {
-            Entities = entities;
-            Attributes = attributes;
+            EntityMetadata = entityMetadata;
         }
 
-        public override void FetchComponents(IOrganizationService service, List<string> publishers, EntityMetadata[] entityMetadata)
+        public override void FetchComponents(IOrganizationService service, List<string> publishers, ComponentBase entities, ComponentBase attributes)
         {
             QueryExpression queryRelationships = new QueryExpression("relationship")
             {
@@ -45,34 +43,36 @@ namespace XTBPlugin.SolutionTransformer.Components
                 queryRelationships.Criteria.Filters[0].AddCondition("name", ConditionOperator.BeginsWith, publisher);
             }
 
-            foreach (EntityMetadata entity in entityMetadata)
+            foreach (EntityMetadata entity in EntityMetadata)
             {
                 if (entity.IsCustomizable.Value && entity.IsIntersect == false)
                 {
-                    HandleOneToManyRelationships(publishers, entityMetadata, entity);
-                    HandleManyToManyRelationships(publishers, entityMetadata, entity);
+                    HandleOneToManyRelationships(publishers, entity, (Entities)entities, (Attributes)attributes);
+                    HandleManyToManyRelationships(publishers, entity, (Entities)entities);
                 }
             }
         }
 
-        private void HandleOneToManyRelationships(List<string> publishers, EntityMetadata[] entityMetadata, EntityMetadata entity)
+        private void HandleOneToManyRelationships(List<string> publishers, EntityMetadata entity, Entities entities, Attributes attributes)
         {
-            IEnumerable<OneToManyRelationshipMetadata> relationships = entity.OneToManyRelationships.Where(r => r.IsCustomRelationship.Value && publishers.Any(p => r.SchemaName.StartsWith(p)));
+            IEnumerable<OneToManyRelationshipMetadata> relationships = entity.IsCustomEntity.Value
+                ? entity.OneToManyRelationships
+                : entity.OneToManyRelationships.Where(r => r.IsCustomRelationship.Value && publishers.Any(p => r.SchemaName.StartsWith(p)));
 
             if (relationships.Any())
             {
                 foreach (OneToManyRelationshipMetadata relationship in relationships)
                 {
-                    EntityMetadata entitySearch = entityMetadata.First(e => e.LogicalName == relationship.ReferencingEntity);
-                    if (!Entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entitySearch.MetadataId.Value)))
+                    EntityMetadata entitySearch = EntityMetadata.First(e => e.LogicalName == relationship.ReferencingEntity);
+                    if (!entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entitySearch.MetadataId.Value)))
                     {
-                        Entities.ComponentDescriptions.Add(new MetadataDescription(entitySearch));
+                        entities.ComponentDescriptions.Add(new MetadataDescription(entitySearch));
                     }
 
-                    AttributeMetadata attributeSearch = entityMetadata.First(e => e.LogicalName == relationship.ReferencingEntity).Attributes.First(a => a.LogicalName == relationship.ReferencingAttribute);
-                    if (!Attributes.ComponentDescriptions.Any(e => e.ComponentId.Equals(attributeSearch.MetadataId.Value)))
+                    AttributeMetadata attributeSearch = EntityMetadata.First(e => e.LogicalName == relationship.ReferencingEntity).Attributes.First(a => a.LogicalName == relationship.ReferencingAttribute);
+                    if (!attributes.ComponentDescriptions.Any(e => e.ComponentId.Equals(attributeSearch.MetadataId.Value)))
                     {
-                        Attributes.ComponentDescriptions.Add(new MetadataDescription(attributeSearch));
+                        attributes.ComponentDescriptions.Add(new MetadataDescription(attributeSearch));
                     }
 
                     ComponentDescriptions.Add(new MetadataDescription(relationship));
@@ -80,24 +80,26 @@ namespace XTBPlugin.SolutionTransformer.Components
             }
         }
 
-        private void HandleManyToManyRelationships(List<string> publishers, EntityMetadata[] entityMetadata, EntityMetadata entity)
+        private void HandleManyToManyRelationships(List<string> publishers, EntityMetadata entity, Entities entities)
         {
-            IEnumerable<ManyToManyRelationshipMetadata> relationships = entity.ManyToManyRelationships.Where(r => r.IsCustomRelationship.Value && publishers.Any(p => r.SchemaName.StartsWith(p)));
+            IEnumerable<ManyToManyRelationshipMetadata> relationships = entity.IsCustomEntity.Value
+                ? entity.ManyToManyRelationships
+                : entity.ManyToManyRelationships.Where(r => r.IsCustomRelationship.Value && publishers.Any(p => r.SchemaName.StartsWith(p)));
 
             if (relationships.Any())
             {
                 foreach (ManyToManyRelationshipMetadata relationship in relationships)
                 {
-                    EntityMetadata entity1Search = entityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
-                    if (!Entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity1Search.MetadataId.Value)))
+                    EntityMetadata entity1Search = EntityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
+                    if (!entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity1Search.MetadataId.Value)))
                     {
-                        Entities.ComponentDescriptions.Add(new MetadataDescription(entity1Search));
+                        entities.ComponentDescriptions.Add(new MetadataDescription(entity1Search));
                     }
 
-                    EntityMetadata entity2Search = entityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
-                    if (!Entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity2Search.MetadataId.Value)))
+                    EntityMetadata entity2Search = EntityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
+                    if (!entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity2Search.MetadataId.Value)))
                     {
-                        Entities.ComponentDescriptions.Add(new MetadataDescription(entity2Search));
+                        entities.ComponentDescriptions.Add(new MetadataDescription(entity2Search));
                     }
 
                     if (!ComponentDescriptions.Any(r => r.ComponentId.Equals(relationship.MetadataId.Value)))

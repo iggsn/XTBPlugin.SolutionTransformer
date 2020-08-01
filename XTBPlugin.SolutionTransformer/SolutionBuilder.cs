@@ -34,36 +34,37 @@ namespace XTBPlugin.SolutionTransformer
                     return false;
                 }
 
-                Entities entities = new Entities();
+                Entities entities = new Entities(entityMetadata);
+                Attributes attributes = new Attributes(entityMetadata);
                 if (settings.IncludeEntites)
                 {
                     reportProgress(0, "Collecting Entities...");
-                    entities.FetchComponents(service, publisher, entityMetadata);
+                    entities.FetchComponents(service, publisher);
                 }
                 ComponentDictionary.Add(ComponentType.Entity, entities);
 
-                Attributes attributes = new Attributes(entities);
+                
                 if (settings.IncludeAttributes)
                 {
                     reportProgress(0, "Collecting Attributes...");
 
-                    attributes.FetchComponents(service, publisher, entityMetadata);
+                    attributes.FetchComponents(service, publisher, entities);
                 }
                 ComponentDictionary.Add(ComponentType.Attributes, attributes);
 
                 if (settings.IncludeRelationships)
                 {
                     reportProgress(0, "Collecting Relationships...");
-                    Relationships relationships = new Relationships(entities, attributes);
-                    relationships.FetchComponents(service, publisher, entityMetadata);
+                    Relationships relationships = new Relationships(entityMetadata);
+                    relationships.FetchComponents(service, publisher, entities, attributes);
                     ComponentDictionary.Add(ComponentType.Relationships, relationships);
                 }
 
                 if (settings.IncludeSystemforms)
                 {
                     reportProgress(0, "Collecting SystemForms...");
-                    SystemForms systemforms = new SystemForms();
-                    systemforms.FetchComponents(service, publisher, entityMetadata);
+                    SystemForms systemforms = new SystemForms(entityMetadata);
+                    systemforms.FetchComponents(service, publisher);
                     ComponentDictionary.Add(ComponentType.SystemForms, systemforms);
                 }
 

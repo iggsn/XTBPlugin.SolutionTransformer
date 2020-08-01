@@ -1,9 +1,7 @@
-﻿using Microsoft.Crm.Sdk.Messages;
-using Microsoft.Xrm.Sdk;
+﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,11 +9,14 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public class SystemForms : ComponentBase
     {
-        public SystemForms() : base()
+        public EntityMetadata[] EntityMetadata;
+
+        public SystemForms(EntityMetadata[] entityMetadata) : base()
         {
+            EntityMetadata = entityMetadata;
         }
 
-        public override void FetchComponents(IOrganizationService service, List<string> publishers, EntityMetadata[] entityMetadata)
+        public override void FetchComponents(IOrganizationService service, List<string> publishers)
         {
             QueryExpression querySystemForms = new QueryExpression("systemform")
             {

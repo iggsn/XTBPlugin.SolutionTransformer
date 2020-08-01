@@ -9,8 +9,6 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public class OptionSets : ComponentBase
     {
-        //public Dictionary<Guid, OptionSetMetadataBase> Components;
-
         public OptionSets() : base()
         {
         }

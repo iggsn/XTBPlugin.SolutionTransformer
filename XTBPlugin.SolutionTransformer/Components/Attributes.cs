@@ -8,26 +8,38 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public class Attributes : ComponentBase
     {
-        public Entities Entities;
+        public EntityMetadata[] EntityMetadata;
 
-        public Attributes(Entities entities) : base()
+        public Attributes(EntityMetadata[] entityMetadata) : base()
         {
-            Entities = entities;
+            EntityMetadata = entityMetadata;
         }
 
-        public override void FetchComponents(IOrganizationService service, List<string> publishers, EntityMetadata[] entityMetadata)
+        public override void FetchComponents(IOrganizationService service, List<string> publishers, ComponentBase entities)
         {
-            foreach (EntityMetadata entity in entityMetadata)
+            foreach (EntityMetadata entity in EntityMetadata)
             {
                 if (entity.IsCustomizable.Value && entity.IsIntersect == false)
                 {
-                    IEnumerable<AttributeMetadata> attributes = entity.Attributes.Where(a => a.IsCustomAttribute.Value && publishers.Any(p => a.SchemaName.StartsWith(p)));
+                    IEnumerable<AttributeMetadata> attributes = null;
 
-                    if (attributes.Any())
+                    if (entity.IsCustomEntity.Value)
                     {
-                        if (!Entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity.MetadataId.Value)))
+                        if (entities.ComponentDescriptions.Any(e => e.Name.Equals(entity.LogicalName)))
                         {
-                            Entities.ComponentDescriptions.Add(new MetadataDescription(entity));
+                            attributes = entity.Attributes;
+                        }
+                    }
+                    else if (entity.IsCustomizable.Value)
+                    {
+                        attributes = entity.Attributes.Where(a => a.IsCustomAttribute.Value && publishers.Any(p => a.SchemaName.StartsWith(p)));
+                    }
+
+                    if (attributes != null && attributes.Any())
+                    {
+                        if (!entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity.MetadataId.Value)))
+                        {
+                            entities.ComponentDescriptions.Add(new MetadataDescription(entity));
                         }
 
                         foreach (AttributeMetadata attribute in attributes)

@@ -8,11 +8,16 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public class Entities : ComponentBase
     {
-        public Entities() : base() {  }
+        public EntityMetadata[] EntityMetadata;
 
-        public override void FetchComponents(IOrganizationService service, List<string> publishers, EntityMetadata[] entityMetadata)
+        public Entities(EntityMetadata[] entityMetadata) : base()
         {
-            foreach (EntityMetadata entity in entityMetadata)
+            EntityMetadata = entityMetadata;
+        }
+
+        public override void FetchComponents(IOrganizationService service, List<string> publishers)
+        {
+            foreach (EntityMetadata entity in EntityMetadata)
             {
                 if (entity.IsManaged == false && publishers.Any(p => entity.SchemaName.StartsWith(p)) && entity.IsIntersect == false)
                 {
