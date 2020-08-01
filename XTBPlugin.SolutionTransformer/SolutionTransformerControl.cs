@@ -267,8 +267,7 @@ namespace XTBPlugin.SolutionTransformer
                         SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Finished with Errors."));
                         MessageBox.Show(args.Error.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-                    bool result = (bool)args.Result;
-                    if (result)
+                    else
                     {
                         SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Finished successfully."));
                     }

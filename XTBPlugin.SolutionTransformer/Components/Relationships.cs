@@ -45,7 +45,7 @@ namespace XTBPlugin.SolutionTransformer.Components
 
             foreach (EntityMetadata entity in EntityMetadata)
             {
-                if (entity.IsCustomizable.Value && entity.IsIntersect == false)
+                if (entity.IsCustomizable.Value && !entity.IsManaged.Value && entity.IsIntersect == false && publishers.Any(p => entity.SchemaName.StartsWith(p)))
                 {
                     HandleOneToManyRelationships(publishers, entity, (Entities)entities, (Attributes)attributes);
                     HandleManyToManyRelationships(publishers, entity, (Entities)entities);
@@ -91,13 +91,13 @@ namespace XTBPlugin.SolutionTransformer.Components
                 foreach (ManyToManyRelationshipMetadata relationship in relationships)
                 {
                     EntityMetadata entity1Search = EntityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
-                    if (!entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity1Search.MetadataId.Value)))
+                    if (entity1Search.IsCustomizable.Value && !entity1Search.IsManaged.Value && !entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity1Search.MetadataId.Value)))
                     {
                         entities.ComponentDescriptions.Add(new MetadataDescription(entity1Search));
                     }
 
                     EntityMetadata entity2Search = EntityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
-                    if (!entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity2Search.MetadataId.Value)))
+                    if (entity2Search.IsCustomizable.Value && !entity2Search.IsManaged.Value && !entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity2Search.MetadataId.Value)))
                     {
                         entities.ComponentDescriptions.Add(new MetadataDescription(entity2Search));
                     }

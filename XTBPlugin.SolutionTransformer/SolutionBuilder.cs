@@ -2,6 +2,10 @@
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Metadata.Query;
+using Microsoft.Xrm.Sdk.Query;
+
+using Newtonsoft.Json;
 
 using System;
 using System.Collections.Generic;
@@ -27,7 +31,7 @@ namespace XTBPlugin.SolutionTransformer
             if (settings.IncludeEntites || settings.IncludeAttributes || settings.IncludeRelationships || settings.IncludeSystemforms)
             {
                 reportProgress(0, "Reading Entity Metadata");
-                EntityMetadata[] entityMetadata = GetEntityMetadata();
+                EntityMetadata[] entityMetadata = GetEntityMetadata(settings);
                 if (!entityMetadata.Any())
                 {
                     reportProgress(0, "Failed reading EntityMetadata!");
@@ -43,7 +47,7 @@ namespace XTBPlugin.SolutionTransformer
                 }
                 ComponentDictionary.Add(ComponentType.Entity, entities);
 
-                
+
                 if (settings.IncludeAttributes)
                 {
                     reportProgress(0, "Collecting Attributes...");
@@ -98,18 +102,52 @@ namespace XTBPlugin.SolutionTransformer
             return true;
         }
 
-        public EntityMetadata[] GetEntityMetadata()
+        public EntityMetadata[] GetEntityMetadata(Settings settings)
         {
-            var request = new RetrieveAllEntitiesRequest
-            {
-                EntityFilters = EntityFilters.All
-            };
+            bool refreshMetadata = true;
 
-            RetrieveAllEntitiesResponse entities = (RetrieveAllEntitiesResponse)service.Execute(request);
-
-            if (entities.EntityMetadata.Any())
+            if (settings.MetadataCached)
             {
-                return entities.EntityMetadata;
+                /*MetadataFilterExpression entityFilter = new MetadataFilterExpression(LogicalOperator.And);
+                entityFilter.Conditions.Add(new MetadataConditionExpression("IsManaged", MetadataConditionOperator.Equals, false));
+                entityFilter.Conditions.Add(new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true));
+                EntityQueryExpression entityQueryExpression = new EntityQueryExpression()
+                {
+                    Criteria = entityFilter
+                };
+                RetrieveMetadataChangesRequest retrieveMetadataChangesRequest = new RetrieveMetadataChangesRequest()
+                {
+                    Query = entityQueryExpression,
+                    ClientVersionStamp = $"{settings.MetadataTimeStamp}!{DateTime.Now.ToString("G")}"
+                };
+                RetrieveMetadataChangesResponse response = (RetrieveMetadataChangesResponse)service.Execute(retrieveMetadataChangesRequest);*/
+                //refreshMetadata = false;
+            }
+
+            if (refreshMetadata)
+            {
+
+                var request = new RetrieveAllEntitiesRequest
+                {
+                    EntityFilters = EntityFilters.All
+                };
+
+                RetrieveAllEntitiesResponse entities = (RetrieveAllEntitiesResponse)service.Execute(request);
+
+                if (entities.EntityMetadata.Any())
+                {
+                    settings.MetadataTimeStamp = $"{entities.Timestamp}!{DateTime.Now.ToString("dd/M/yyyy HH:mm:ss")}";
+                    //settings.MetadataCached = true;
+                    //settings.Metadata = JsonConvert.SerializeObject(entities.EntityMetadata);
+
+                    return entities.EntityMetadata;
+                }
+
+            }
+
+            if (!string.IsNullOrEmpty(settings.Metadata))
+            {
+                return JsonConvert.DeserializeObject<EntityMetadata[]>(settings.Metadata);
             }
             else
             {
@@ -155,9 +193,10 @@ namespace XTBPlugin.SolutionTransformer
 
                     ExecuteMultipleResponse responseWithResults = (ExecuteMultipleResponse)service.Execute(requestWithResults);
 
-                    if (responseWithResults.Responses.Any(r => r.Fault != null))
+                    if (responseWithResults.IsFaulted)
                     {
-                        return false;
+                        var errors = responseWithResults.Responses.Where(r => r.Fault != null);
+                        throw new Exception(errors.First().Fault.Message);
                     }
 
                     //// Display the results returned in the responses.

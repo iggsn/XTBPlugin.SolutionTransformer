@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.Xrm.Sdk.Metadata;
+
+using System.ComponentModel;
 
 namespace XTBPlugin.SolutionTransformer
 {
@@ -19,6 +21,24 @@ namespace XTBPlugin.SolutionTransformer
         [DisplayName("Last Solution")]
         [Description("Stores the last Solution you used.")]
         public string LastTargetSolutionName { get; set; }
+
+        [Browsable(true)]
+        [ReadOnly(true)]
+        [Category("Internal Settings")]
+        [DisplayName("Metadata Timestamp")]
+        [Description("Timestamp od the Metadata retrieved last time")]
+        public string MetadataTimeStamp { get; set; }
+
+        [Browsable(true)]
+        [ReadOnly(true)]
+        [Category("Internal Settings")]
+        [DisplayName("Metadata Cached")]
+        [Description("Metadata Cached")]
+        public bool MetadataCached { get; set; }
+
+        [Browsable(false)]
+        public string Metadata { get; set; }
+
 
         [Browsable(true)]
         [ReadOnly(false)]
