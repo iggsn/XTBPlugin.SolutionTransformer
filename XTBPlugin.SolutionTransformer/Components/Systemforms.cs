@@ -11,11 +11,8 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public class SystemForms : ComponentBase
     {
-        public Dictionary<Guid, Entity> Components;
-
-        public SystemForms() : base(ComponentType.SystemForms)
+        public SystemForms() : base()
         {
-            Components = new Dictionary<Guid, Entity>();
         }
 
         public override void FetchComponents(IOrganizationService service, List<string> publishers, EntityMetadata[] entityMetadata)
@@ -53,25 +50,9 @@ namespace XTBPlugin.SolutionTransformer.Components
 
             if (systemForms.Entities.Any())
             {
-                Components = systemForms.Entities.ToList().ToDictionary(x => x.Id);
+                ComponentDescriptions.AddRange(from Entity entity in systemForms.Entities
+                                               select new MetadataDescription(entity, ComponentType.SystemForms));
             }
-        }
-
-        public override List<AddSolutionComponentRequest> GetRequestList(string solutionUniqueName)
-        {
-            List<AddSolutionComponentRequest> list = new List<AddSolutionComponentRequest>();
-            foreach (var component in Components)
-            {
-                list.Add(new AddSolutionComponentRequest
-                {
-                    AddRequiredComponents = false,
-                    ComponentId = component.Key,
-                    ComponentType = (int)SubType,
-                    SolutionUniqueName = solutionUniqueName
-                });
-            }
-
-            return list;
         }
     }
 }

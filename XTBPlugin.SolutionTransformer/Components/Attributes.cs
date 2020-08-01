@@ -1,8 +1,6 @@
-﻿using Microsoft.Crm.Sdk.Messages;
-using Microsoft.Xrm.Sdk;
+﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,12 +8,10 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public class Attributes : ComponentBase
     {
-        public Dictionary<Guid, AttributeMetadata> Components;
         public Entities Entities;
 
-        public Attributes(Entities entities) : base(ComponentType.Attributes)
+        public Attributes(Entities entities) : base()
         {
-            Components = new Dictionary<Guid, AttributeMetadata>();
             Entities = entities;
         }
 
@@ -29,36 +25,18 @@ namespace XTBPlugin.SolutionTransformer.Components
 
                     if (attributes.Any())
                     {
-                        if (!Entities.Components.ContainsKey(entity.MetadataId.Value))
+                        if (!Entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity.MetadataId.Value)))
                         {
-                            Entities.Components.Add(entity.MetadataId.Value, entity);
+                            Entities.ComponentDescriptions.Add(new MetadataDescription(entity));
                         }
 
                         foreach (AttributeMetadata attribute in attributes)
                         {
-                            Components.Add(attribute.MetadataId.Value, attribute);
+                            ComponentDescriptions.Add(new MetadataDescription(attribute));
                         }
                     }
                 }
             }
-        }
-
-        public override List<AddSolutionComponentRequest> GetRequestList(string solutionUniqueName)
-        {
-            List<AddSolutionComponentRequest> list = new List<AddSolutionComponentRequest>();
-            foreach (var component in Components)
-            {
-                list.Add(new AddSolutionComponentRequest
-                {
-                    AddRequiredComponents = false,
-                    ComponentId = component.Key,
-                    ComponentType = (int)SubType,
-                    SolutionUniqueName = solutionUniqueName,
-                    DoNotIncludeSubcomponents = true
-                });
-            }
-
-            return list;
         }
     }
 }

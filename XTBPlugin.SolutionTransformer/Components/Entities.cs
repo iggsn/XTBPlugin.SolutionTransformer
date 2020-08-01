@@ -1,8 +1,6 @@
-﻿using Microsoft.Crm.Sdk.Messages;
-using Microsoft.Xrm.Sdk;
+﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,12 +8,7 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public class Entities : ComponentBase
     {
-        public Dictionary<Guid, EntityMetadata> Components;
-
-        public Entities() : base(ComponentType.Entity)
-        {
-            Components = new Dictionary<Guid, EntityMetadata>();
-        }
+        public Entities() : base() {  }
 
         public override void FetchComponents(IOrganizationService service, List<string> publishers, EntityMetadata[] entityMetadata)
         {
@@ -23,27 +16,9 @@ namespace XTBPlugin.SolutionTransformer.Components
             {
                 if (entity.IsManaged == false && publishers.Any(p => entity.SchemaName.StartsWith(p)) && entity.IsIntersect == false)
                 {
-                    Components.Add(entity.MetadataId.Value, entity);
+                    ComponentDescriptions.Add(new MetadataDescription(entity));
                 }
             }
-        }
-
-        public override List<AddSolutionComponentRequest> GetRequestList(string solutionUniqueName)
-        {
-            List<AddSolutionComponentRequest> list = new List<AddSolutionComponentRequest>();
-            foreach (var component in Components)
-            {
-                list.Add(new AddSolutionComponentRequest
-                {
-                    AddRequiredComponents = false,
-                    ComponentId = component.Key,
-                    ComponentType = (int)SubType,
-                    SolutionUniqueName = solutionUniqueName,
-                    DoNotIncludeSubcomponents = true
-                });
-            }
-
-            return list;
         }
     }
 }

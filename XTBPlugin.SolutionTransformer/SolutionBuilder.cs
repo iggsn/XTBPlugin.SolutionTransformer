@@ -39,12 +39,8 @@ namespace XTBPlugin.SolutionTransformer
                 {
                     reportProgress(0, "Collecting Entities...");
                     entities.FetchComponents(service, publisher, entityMetadata);
-                    ComponentDictionary.Add(entities.SubType, entities);
                 }
-                else
-                {
-                    ComponentDictionary.Add(entities.SubType, entities);
-                }
+                ComponentDictionary.Add(ComponentType.Entity, entities);
 
                 Attributes attributes = new Attributes(entities);
                 if (settings.IncludeAttributes)
@@ -52,19 +48,15 @@ namespace XTBPlugin.SolutionTransformer
                     reportProgress(0, "Collecting Attributes...");
 
                     attributes.FetchComponents(service, publisher, entityMetadata);
-                    ComponentDictionary.Add(attributes.SubType, attributes);
                 }
-                else
-                {
-                    ComponentDictionary.Add(attributes.SubType, attributes);
-                }
+                ComponentDictionary.Add(ComponentType.Attributes, attributes);
 
                 if (settings.IncludeRelationships)
                 {
                     reportProgress(0, "Collecting Relationships...");
                     Relationships relationships = new Relationships(entities, attributes);
                     relationships.FetchComponents(service, publisher, entityMetadata);
-                    ComponentDictionary.Add(relationships.SubType, relationships);
+                    ComponentDictionary.Add(ComponentType.Relationships, relationships);
                 }
 
                 if (settings.IncludeSystemforms)
@@ -72,7 +64,7 @@ namespace XTBPlugin.SolutionTransformer
                     reportProgress(0, "Collecting SystemForms...");
                     SystemForms systemforms = new SystemForms();
                     systemforms.FetchComponents(service, publisher, entityMetadata);
-                    ComponentDictionary.Add(systemforms.SubType, systemforms);
+                    ComponentDictionary.Add(ComponentType.SystemForms, systemforms);
                 }
 
             }
@@ -82,7 +74,7 @@ namespace XTBPlugin.SolutionTransformer
                 reportProgress(0, "Collecting OptionSets...");
                 OptionSets optionsets = new OptionSets();
                 optionsets.FetchComponents(service, publisher);
-                ComponentDictionary.Add(optionsets.SubType, optionsets);
+                ComponentDictionary.Add(ComponentType.OptionSets, optionsets);
             }
 
             if (settings.IncludeWebResource)
@@ -90,16 +82,16 @@ namespace XTBPlugin.SolutionTransformer
                 reportProgress(0, "Collecting WebResources...");
                 WebResources webResources = new WebResources();
                 webResources.FetchComponents(service, publisher);
-                ComponentDictionary.Add(webResources.SubType, webResources);
+                ComponentDictionary.Add(ComponentType.WebResources, webResources);
             }
 
-            
+
             if (settings.IncludePluginAssembly)
             {
                 PluginAssemblies pluginAssemblies = new PluginAssemblies();
                 reportProgress(0, "Collecting PluginAssemblies...");
                 pluginAssemblies.FetchComponents(service, publisher);
-                ComponentDictionary.Add(pluginAssemblies.SubType, pluginAssemblies);
+                ComponentDictionary.Add(ComponentType.PluginAssemblies, pluginAssemblies);
             }
 
             return true;

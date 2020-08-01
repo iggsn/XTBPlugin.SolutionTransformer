@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>XTBPlugin.SolutionTransformer</RootNamespace>
     <AssemblyName>XTBPlugin.SolutionTransformer</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -66,6 +67,7 @@
     <Reference Include="System.Workflow.Runtime" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\MetadataDescription.cs" />
     <Compile Include="Components\SystemForms.cs" />
     <Compile Include="Components\Relationships.cs" />
     <Compile Include="Components\ComponentBase.cs" />

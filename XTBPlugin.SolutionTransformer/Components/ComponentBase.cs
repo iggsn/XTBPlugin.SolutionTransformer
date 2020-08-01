@@ -9,13 +9,11 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public abstract class ComponentBase : IComponentBase
     {
-        internal readonly ComponentType SubType;
+        public List<MetadataDescription> ComponentDescriptions;
 
-        public ComponentBase() { }
-
-        protected ComponentBase(ComponentType subType)
+        public ComponentBase()
         {
-            SubType = subType;
+            ComponentDescriptions = new List<MetadataDescription>();
         }
 
         public virtual void FetchComponents(IOrganizationService service, List<string> publishers)
@@ -28,9 +26,22 @@ namespace XTBPlugin.SolutionTransformer.Components
             throw new NotImplementedException();
         }
 
-        public virtual List<AddSolutionComponentRequest> GetRequestList(string solutionUniqueName)
+        public List<AddSolutionComponentRequest> GetRequestList(string solutionUniqueName)
         {
-            throw new NotImplementedException();
+            List<AddSolutionComponentRequest> list = new List<AddSolutionComponentRequest>();
+            foreach (var component in ComponentDescriptions)
+            {
+                list.Add(new AddSolutionComponentRequest
+                {
+                    AddRequiredComponents = false,
+                    ComponentId = component.ComponentId,
+                    ComponentType = (int)component.Type,
+                    SolutionUniqueName = solutionUniqueName,
+                    DoNotIncludeSubcomponents = true
+                });
+            }
+
+            return list;
         }
     }
 }

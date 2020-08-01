@@ -1,10 +1,7 @@
-﻿using Microsoft.Crm.Sdk.Messages;
-using Microsoft.Xrm.Sdk;
+﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
-using Microsoft.Xrm.Sdk.Metadata.Query;
 using Microsoft.Xrm.Sdk.Query;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,13 +9,11 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public class Relationships : ComponentBase
     {
-        public Dictionary<Guid, RelationshipMetadataBase> Components;
         public Entities Entities;
         public Attributes Attributes;
 
-        public Relationships(Entities entities, Attributes attributes) : base(ComponentType.Relationships)
+        public Relationships(Entities entities, Attributes attributes) : base()
         {
-            Components = new Dictionary<Guid, RelationshipMetadataBase>();
             Entities = entities;
             Attributes = attributes;
         }
@@ -60,24 +55,6 @@ namespace XTBPlugin.SolutionTransformer.Components
             }
         }
 
-        public override List<AddSolutionComponentRequest> GetRequestList(string solutionUniqueName)
-        {
-            List<AddSolutionComponentRequest> list = new List<AddSolutionComponentRequest>();
-            foreach (var component in Components)
-            {
-                list.Add(new AddSolutionComponentRequest
-                {
-                    AddRequiredComponents = false,
-                    ComponentId = component.Key,
-                    ComponentType = (int)SubType,
-                    SolutionUniqueName = solutionUniqueName,
-                    DoNotIncludeSubcomponents = true
-                });
-            }
-
-            return list;
-        }
-
         private void HandleOneToManyRelationships(List<string> publishers, EntityMetadata[] entityMetadata, EntityMetadata entity)
         {
             IEnumerable<OneToManyRelationshipMetadata> relationships = entity.OneToManyRelationships.Where(r => r.IsCustomRelationship.Value && publishers.Any(p => r.SchemaName.StartsWith(p)));
@@ -87,18 +64,18 @@ namespace XTBPlugin.SolutionTransformer.Components
                 foreach (OneToManyRelationshipMetadata relationship in relationships)
                 {
                     EntityMetadata entitySearch = entityMetadata.First(e => e.LogicalName == relationship.ReferencingEntity);
-                    if (!Entities.Components.ContainsKey(entitySearch.MetadataId.Value))
+                    if (!Entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entitySearch.MetadataId.Value)))
                     {
-                        Entities.Components.Add(entitySearch.MetadataId.Value, entitySearch);
+                        Entities.ComponentDescriptions.Add(new MetadataDescription(entitySearch));
                     }
 
                     AttributeMetadata attributeSearch = entityMetadata.First(e => e.LogicalName == relationship.ReferencingEntity).Attributes.First(a => a.LogicalName == relationship.ReferencingAttribute);
-                    if (!Attributes.Components.ContainsKey(attributeSearch.MetadataId.Value))
+                    if (!Attributes.ComponentDescriptions.Any(e => e.ComponentId.Equals(attributeSearch.MetadataId.Value)))
                     {
-                        Attributes.Components.Add(attributeSearch.MetadataId.Value, attributeSearch);
+                        Attributes.ComponentDescriptions.Add(new MetadataDescription(attributeSearch));
                     }
 
-                    Components.Add(relationship.MetadataId.Value, relationship);
+                    ComponentDescriptions.Add(new MetadataDescription(relationship));
                 }
             }
         }
@@ -111,14 +88,21 @@ namespace XTBPlugin.SolutionTransformer.Components
             {
                 foreach (ManyToManyRelationshipMetadata relationship in relationships)
                 {
-                    if (!Entities.Components.ContainsKey(entity.MetadataId.Value))
+                    EntityMetadata entity1Search = entityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
+                    if (!Entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity1Search.MetadataId.Value)))
                     {
-                        Entities.Components.Add(entity.MetadataId.Value, entity);
+                        Entities.ComponentDescriptions.Add(new MetadataDescription(entity1Search));
                     }
 
-                    if (!Components.ContainsKey(relationship.MetadataId.Value))
+                    EntityMetadata entity2Search = entityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
+                    if (!Entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity2Search.MetadataId.Value)))
                     {
-                        Components.Add(relationship.MetadataId.Value, relationship);
+                        Entities.ComponentDescriptions.Add(new MetadataDescription(entity2Search));
+                    }
+
+                    if (!ComponentDescriptions.Any(r => r.ComponentId.Equals(relationship.MetadataId.Value)))
+                    {
+                        ComponentDescriptions.Add(new MetadataDescription(relationship));
                     }
                 }
             }

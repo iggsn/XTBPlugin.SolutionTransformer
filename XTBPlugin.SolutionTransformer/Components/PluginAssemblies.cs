@@ -10,11 +10,8 @@ namespace XTBPlugin.SolutionTransformer.Components
 {
     public class PluginAssemblies : ComponentBase
     {
-        public Dictionary<Guid, Entity> Components;
-
-        public PluginAssemblies() : base(ComponentType.PluginAssemblies)
+        public PluginAssemblies() : base()
         {
-            Components = new Dictionary<Guid, Entity>();
         }
 
         public override void FetchComponents(IOrganizationService service, List<string> publishers)
@@ -50,25 +47,9 @@ namespace XTBPlugin.SolutionTransformer.Components
 
             if (pluginAssemblies.Entities.Any())
             {
-                Components = pluginAssemblies.Entities.ToList().ToDictionary(x => x.Id);
+                ComponentDescriptions.AddRange(from Entity entity in pluginAssemblies.Entities
+                                               select new MetadataDescription(entity, ComponentType.PluginAssemblies));
             }
-        }
-
-        public override List<AddSolutionComponentRequest> GetRequestList(string solutionUniqueName)
-        {
-            List<AddSolutionComponentRequest> list = new List<AddSolutionComponentRequest>();
-            foreach (var component in Components)
-            {
-                list.Add(new AddSolutionComponentRequest
-                {
-                    AddRequiredComponents = false,
-                    ComponentId = component.Key,
-                    ComponentType = (int)SubType,
-                    SolutionUniqueName = solutionUniqueName
-                });
-            }
-
-            return list;
         }
     }
 }
