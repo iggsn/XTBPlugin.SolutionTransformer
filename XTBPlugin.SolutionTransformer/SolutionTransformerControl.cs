@@ -46,12 +46,6 @@ namespace XTBPlugin.SolutionTransformer
         public SolutionTransformerControl()
         {
             InitializeComponent();
-        }
-
-        private void SolutionTransformerControl_Load(object sender, EventArgs e)
-        {
-            //ShowInfoNotification("This is a notification that can lead to XrmToolBox repository", new Uri("https://github.com/MscrmTools/XrmToolBox"));
-
             // Loads or creates the settings for the plugin
             if (!SettingsManager.Instance.TryLoad(GetType(), out mySettings))
             {
@@ -63,7 +57,11 @@ namespace XTBPlugin.SolutionTransformer
             {
                 LogInfo("Settings found and loaded");
             }
+        }
 
+        private void SolutionTransformerControl_Load(object sender, EventArgs e)
+        {
+            //ShowInfoNotification("This is a notification that can lead to XrmToolBox repository", new Uri("https://github.com/MscrmTools/XrmToolBox"));
             pg_Settings.SelectedObject = mySettings;
 
             tsbRefresh.Enabled = false;
@@ -242,6 +240,7 @@ namespace XTBPlugin.SolutionTransformer
                     {
                         tsbAddToSolution.Enabled = true;
                         SendMessageToStatusBar?.Invoke(this, new StatusBarMessageEventArgs("Finished successfully."));
+                        SettingsManager.Instance.Save(GetType(), mySettings);
                     }
                 },
                 ProgressChanged = e => { SetWorkingMessage(e.UserState.ToString()); }
@@ -303,6 +302,7 @@ namespace XTBPlugin.SolutionTransformer
             if (mySettings != null && detail != null)
             {
                 mySettings.LastUsedOrganizationWebappUrl = detail.WebApplicationUrl;
+                mySettings.LastUsedOrganizationName = detail.Organization;
                 LogInfo("Connection has changed to: {0}", detail.WebApplicationUrl);
             }
         }

@@ -30,19 +30,20 @@ namespace XTBPlugin.SolutionTransformer.Components
             throw new NotImplementedException();
         }
 
-        public List<AddSolutionComponentRequest> GetRequestList(string solutionUniqueName)
+        public List<Tuple<AddSolutionComponentRequest, MetadataDescription>> GetRequestList(string solutionUniqueName)
         {
-            List<AddSolutionComponentRequest> list = new List<AddSolutionComponentRequest>();
+            List<Tuple<AddSolutionComponentRequest, MetadataDescription>> list = new List<Tuple<AddSolutionComponentRequest, MetadataDescription>>();
             foreach (var component in ComponentDescriptions)
             {
-                list.Add(new AddSolutionComponentRequest
+                list.Add(new Tuple<AddSolutionComponentRequest, MetadataDescription>(new AddSolutionComponentRequest
                 {
                     AddRequiredComponents = false,
                     ComponentId = component.ComponentId,
                     ComponentType = (int)component.Type,
                     SolutionUniqueName = solutionUniqueName,
                     DoNotIncludeSubcomponents = true
-                });
+                },
+                component));
             }
 
             return list;

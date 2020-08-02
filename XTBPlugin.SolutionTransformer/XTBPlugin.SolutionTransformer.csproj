@@ -78,6 +78,7 @@
     <Compile Include="Components\OptionSets.cs" />
     <Compile Include="Components\PluginAssemblies.cs" />
     <Compile Include="Components\WebResources.cs" />
+    <Compile Include="MetadataCache.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

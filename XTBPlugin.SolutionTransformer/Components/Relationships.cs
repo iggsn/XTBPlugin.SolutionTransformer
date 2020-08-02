@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
-using Microsoft.Xrm.Sdk.Query;
 
 using System.Collections.Generic;
 using System.Linq;
@@ -18,38 +17,10 @@ namespace XTBPlugin.SolutionTransformer.Components
 
         public override void FetchComponents(IOrganizationService service, List<string> publishers, ComponentBase entities, ComponentBase attributes)
         {
-            QueryExpression queryRelationships = new QueryExpression("relationship")
+            foreach (EntityMetadata entity in EntityMetadata.Where(e => e.IsCustomizable.Value && !e.IsManaged.Value && !e.IsIntersect.Value && publishers.Any(p => e.SchemaName.StartsWith(p))))
             {
-                ColumnSet = new ColumnSet("name", "relationshipid"),
-                Criteria =
-                        {
-                            FilterOperator = LogicalOperator.And,
-                            Conditions = {
-                                new ConditionExpression("componentstate", ConditionOperator.Equal, 0),
-                             },
-                            Filters =
-                                {
-                                     new FilterExpression
-                                     {
-                                         FilterOperator =LogicalOperator.Or,
-                                         Conditions = {}
-                                     }
-                                }
-                        }
-            };
-
-            foreach (string publisher in publishers)
-            {
-                queryRelationships.Criteria.Filters[0].AddCondition("name", ConditionOperator.BeginsWith, publisher);
-            }
-
-            foreach (EntityMetadata entity in EntityMetadata)
-            {
-                if (entity.IsCustomizable.Value && !entity.IsManaged.Value && entity.IsIntersect == false && publishers.Any(p => entity.SchemaName.StartsWith(p)))
-                {
-                    HandleOneToManyRelationships(publishers, entity, (Entities)entities, (Attributes)attributes);
-                    HandleManyToManyRelationships(publishers, entity, (Entities)entities);
-                }
+                HandleOneToManyRelationships(publishers, entity, (Entities)entities, (Attributes)attributes);
+                HandleManyToManyRelationships(publishers, entity, (Entities)entities);
             }
         }
 
@@ -90,17 +61,17 @@ namespace XTBPlugin.SolutionTransformer.Components
             {
                 foreach (ManyToManyRelationshipMetadata relationship in relationships)
                 {
-                    EntityMetadata entity1Search = EntityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
-                    if (entity1Search.IsCustomizable.Value && !entity1Search.IsManaged.Value && !entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity1Search.MetadataId.Value)))
-                    {
-                        entities.ComponentDescriptions.Add(new MetadataDescription(entity1Search));
-                    }
+                    //EntityMetadata entity1Search = EntityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
+                    //if (entity1Search.IsCustomizable.Value && !entity1Search.IsManaged.Value && !entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity1Search.MetadataId.Value)))
+                    //{
+                    //    entities.ComponentDescriptions.Add(new MetadataDescription(entity1Search));
+                    //}
 
-                    EntityMetadata entity2Search = EntityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
-                    if (entity2Search.IsCustomizable.Value && !entity2Search.IsManaged.Value && !entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity2Search.MetadataId.Value)))
-                    {
-                        entities.ComponentDescriptions.Add(new MetadataDescription(entity2Search));
-                    }
+                    //EntityMetadata entity2Search = EntityMetadata.First(e => e.LogicalName == relationship.Entity1LogicalName);
+                    //if (entity2Search.IsCustomizable.Value && !entity2Search.IsManaged.Value && !entities.ComponentDescriptions.Any(e => e.ComponentId.Equals(entity2Search.MetadataId.Value)))
+                    //{
+                    //    entities.ComponentDescriptions.Add(new MetadataDescription(entity2Search));
+                    //}
 
                     if (!ComponentDescriptions.Any(r => r.ComponentId.Equals(relationship.MetadataId.Value)))
                     {

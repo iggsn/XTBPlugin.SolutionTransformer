@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using XrmToolBox.Extensibility;
+
 using XTBPlugin.SolutionTransformer.Components;
 
 namespace XTBPlugin.SolutionTransformer
@@ -104,62 +106,60 @@ namespace XTBPlugin.SolutionTransformer
 
         public EntityMetadata[] GetEntityMetadata(Settings settings)
         {
-            bool refreshMetadata = true;
+            EntityMetadata[] result = null;
 
-            if (settings.MetadataCached)
+            MetadataCache metadataCache;
+
+            if (!SettingsManager.Instance.TryLoad(GetType(), out metadataCache, $"Metadata-{settings.LastUsedOrganizationName}"))
             {
-                /*MetadataFilterExpression entityFilter = new MetadataFilterExpression(LogicalOperator.And);
-                entityFilter.Conditions.Add(new MetadataConditionExpression("IsManaged", MetadataConditionOperator.Equals, false));
-                entityFilter.Conditions.Add(new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true));
-                EntityQueryExpression entityQueryExpression = new EntityQueryExpression()
-                {
-                    Criteria = entityFilter
-                };
-                RetrieveMetadataChangesRequest retrieveMetadataChangesRequest = new RetrieveMetadataChangesRequest()
-                {
-                    Query = entityQueryExpression,
-                    ClientVersionStamp = $"{settings.MetadataTimeStamp}!{DateTime.Now.ToString("G")}"
-                };
-                RetrieveMetadataChangesResponse response = (RetrieveMetadataChangesResponse)service.Execute(retrieveMetadataChangesRequest);*/
-                //refreshMetadata = false;
+                metadataCache = new MetadataCache();
+                metadataCache.OrganizationName = settings.LastUsedOrganizationName;
             }
 
-            if (refreshMetadata)
+            MetadataFilterExpression entityFilter = new MetadataFilterExpression(LogicalOperator.And);
+            entityFilter.Conditions.Add(new MetadataConditionExpression("IsManaged", MetadataConditionOperator.Equals, false));
+            entityFilter.Conditions.Add(new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true));
+            entityFilter.Conditions.Add(new MetadataConditionExpression("IsIntersect", MetadataConditionOperator.Equals, false));
+            EntityQueryExpression entityQueryExpression = new EntityQueryExpression()
             {
+                Criteria = entityFilter
+            };
+            RetrieveMetadataChangesRequest retrieveMetadataChangesRequest = new RetrieveMetadataChangesRequest()
+            {
+                Query = entityQueryExpression,
+                ClientVersionStamp = metadataCache.IsCached && !string.IsNullOrEmpty(metadataCache.TimeStamp) ? metadataCache.TimeStamp : null
+            };
+            RetrieveMetadataChangesResponse response = (RetrieveMetadataChangesResponse)service.Execute(retrieveMetadataChangesRequest);
 
-                var request = new RetrieveAllEntitiesRequest
+            if (metadataCache.IsCached)
+            {
+                if (response.ServerVersionStamp != metadataCache.TimeStamp)
                 {
-                    EntityFilters = EntityFilters.All
-                };
-
-                RetrieveAllEntitiesResponse entities = (RetrieveAllEntitiesResponse)service.Execute(request);
-
-                if (entities.EntityMetadata.Any())
-                {
-                    settings.MetadataTimeStamp = $"{entities.Timestamp}!{DateTime.Now.ToString("dd/M/yyyy HH:mm:ss")}";
-                    //settings.MetadataCached = true;
-                    //settings.Metadata = JsonConvert.SerializeObject(entities.EntityMetadata);
-
-                    return entities.EntityMetadata;
+                    throw new Exception("Please handle Metadata Changes");
                 }
-
-            }
-
-            if (!string.IsNullOrEmpty(settings.Metadata))
-            {
-                return JsonConvert.DeserializeObject<EntityMetadata[]>(settings.Metadata);
+                else
+                {
+                    result = JsonConvert.DeserializeObject<EntityMetadataCollection>(metadataCache.Metadata).ToArray();
+                }
             }
             else
             {
-                return new EntityMetadata[0];
+                result = response.EntityMetadata.ToArray();
+                metadataCache.TimeStamp = response.ServerVersionStamp;
+                metadataCache.IsCached = true;
+                metadataCache.Metadata = JsonConvert.SerializeObject(response.EntityMetadata, response.EntityMetadata.GetType(), new JsonSerializerSettings() { });
             }
+
+            SettingsManager.Instance.Save(GetType(), metadataCache, $"Metadata-{settings.LastUsedOrganizationName}");
+
+            return result;
         }
 
         public bool AddComponentsToSolution(string targetSolution, Settings mySettings, Action<int, string> reportProgress)
         {
             reportProgress(0, "Prepare AddSolutionComponentRequests...");
 
-            List<AddSolutionComponentRequest> fullRequests = new List<AddSolutionComponentRequest>();
+            List<Tuple<AddSolutionComponentRequest, MetadataDescription>> fullRequests = new List<Tuple<AddSolutionComponentRequest, MetadataDescription>>();
 
             foreach (KeyValuePair<ComponentType, IComponentBase> componentTypes in ComponentDictionary)
             {
@@ -189,7 +189,7 @@ namespace XTBPlugin.SolutionTransformer
                         Requests = new OrganizationRequestCollection()
                     };
 
-                    requestWithResults.Requests.AddRange(fullRequests.Skip((pageNumber - 1) * mySettings.ExecuteMultipleBatchSize).Take(mySettings.ExecuteMultipleBatchSize));
+                    requestWithResults.Requests.AddRange(fullRequests.Skip((pageNumber - 1) * mySettings.ExecuteMultipleBatchSize).Take(mySettings.ExecuteMultipleBatchSize).Select(i => i.Item1));
 
                     ExecuteMultipleResponse responseWithResults = (ExecuteMultipleResponse)service.Execute(requestWithResults);
 
@@ -219,7 +219,7 @@ namespace XTBPlugin.SolutionTransformer
             {
                 foreach (var request in fullRequests)
                 {
-                    service.Execute(request);
+                    service.Execute(request.Item1);
                 }
             }
 
