@@ -19,7 +19,7 @@ namespace XTBPlugin.SolutionTransformer.Components
         {
             foreach (EntityMetadata entity in EntityMetadata)
             {
-                if (entity.IsManaged == false && publishers.Any(p => entity.SchemaName.StartsWith(p)) && entity.IsIntersect == false)
+                if (entity.IsManaged == false && publishers.Any(p => entity.SchemaName.StartsWith(p)) && entity.IsIntersect == false && entity.IsCustomEntity == true && entity.IsBPFEntity == false)
                 {
                     ComponentDescriptions.Add(new MetadataDescription(entity));
                 }

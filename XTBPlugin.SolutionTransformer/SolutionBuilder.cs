@@ -117,7 +117,6 @@ namespace XTBPlugin.SolutionTransformer
             }
 
             MetadataFilterExpression entityFilter = new MetadataFilterExpression(LogicalOperator.And);
-            entityFilter.Conditions.Add(new MetadataConditionExpression("IsManaged", MetadataConditionOperator.Equals, false));
             entityFilter.Conditions.Add(new MetadataConditionExpression("IsCustomizable", MetadataConditionOperator.Equals, true));
             entityFilter.Conditions.Add(new MetadataConditionExpression("IsIntersect", MetadataConditionOperator.Equals, false));
             EntityQueryExpression entityQueryExpression = new EntityQueryExpression()
